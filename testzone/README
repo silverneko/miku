@@ -1,0 +1,2 @@
+All the processing such as compiling should be done here.
+Judging process should be proformed in the directory 'chroot' as a jailed process.
