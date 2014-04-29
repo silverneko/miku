@@ -4,6 +4,7 @@
 #include"submission.h"
 #include"compile.h"
 #include"sandbox.h"
+#include"config.h"
 
 using namespace std;
 
@@ -12,6 +13,8 @@ int testsuite(submission &sub, problem &pro, result &res)
    sandbox box(10);
    box.init();
    compile(box, sub);
+   for(int i = 0; i )
+   //while(true);
 
    box.cleanup();
    return 0;

@@ -18,7 +18,6 @@ class result{
 
 class problem{
    public:
-      int problem_id;
       int problem_type;
       string special_judge;
       int mem_limit;
@@ -26,7 +25,6 @@ class problem{
       int testdata_count;
       problem()
       {
-         problem_id = 0;
          problem_type = 0;
          special_judge = "";
          mem_limit = 0;

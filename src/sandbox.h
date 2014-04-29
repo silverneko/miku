@@ -13,7 +13,9 @@ class sandbox{
       sandbox(int id) : box_id(id)
       {
          ostringstream sout;
-         sout << "./isolate/isolate --stderr=compile_error --dir=./:rw --box-id=" << id << " ";
+         sout << "./isolate/isolate --wall-time=30 --dir=/etc/ "
+              << "-e --processes=50 --stderr=compile_error --box-id="
+              << id << " ";
          comm = sout.str();
       }
       int id()
@@ -22,17 +24,17 @@ class sandbox{
       }
       void init()
       {
-         system((comm + " --init >/dev/null").c_str());
+         system((comm + " --init 2>/dev/null >/dev/null").c_str());
          cerr << "[debug] box-10 inited" << endl;
       }
       void cleanup()
       {
-         system((comm + " --cleanup >/dev/null").c_str());
+         system((comm + " --cleanup 2>/dev/null >/dev/null").c_str());
          cerr << "[debug] box-10 cleaned" << endl;
       }
       void execute(const string &ex)
       {
-         system((comm + ex).c_str());
+         system((comm + " --run -- " + ex + " 2>/dev/null >/dev/null").c_str());
       }
 };
 

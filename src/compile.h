@@ -18,10 +18,10 @@ int compile(sandbox &box, const submission& target)
    fout << target.source << flush;
    fout.close();
 
-   sout.str() = "";
+   sout.str("");
    if(target.lang == "c++"){
-      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 -static";
-      sout << "-std=" << target.std;// << " 2>/dev/null ";
+      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 -static ";
+      sout << "-std=" << target.std << " ";// << " 2>/dev/null ";
    }
    //system(sout.str().c_str());
    box.execute(sout.str());
