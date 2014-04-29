@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import MySQLdb
-import MySQLdb.cursors
 
 db = MySQLdb.connect("localhost", "root", "iloveinfor", "tioj_dev");
 cursor = db.cursor(MySQLdb.cursors.DictCursor);

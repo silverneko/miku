@@ -17,7 +17,7 @@ char buff[5000000];
 
 int fetch_submission(submission &sub)
 {
-   FILE* Pipe = popen("./src/fetch_submission.py", "r");
+   FILE *Pipe = popen("./src/fetch_submission.py", "r");
    fscanf(Pipe, "%d", &sub.submission_id);
    if(sub.submission_id == -1)
       return -1;
@@ -34,12 +34,66 @@ int fetch_submission(submission &sub)
    return 0;
 }
 
-int fetch_problem(int id, problem &pro)
+int download_testdata(int problem_id, problem &pro)
 {
    ostringstream sout;
+   sout << "./src/fetch_problem_meta.py " << problem_id;
+   FILE *Pipe = popen(sout.str().c_str(), "r");
+   sout.str("");
    sout << "./testdata/";
-   sout << setfill('0') << setw(4) << id;
-   sout << "/meta";
+   sout << setfill('0') << setw(4) << problem_id;
+   string dir(sout.str());
+   ofstream fout(dir + "/meta");
+   int testdata_count;
+   fscanf(Pipe, "%d", &testdata_count);
+   fout << testdata_count << endl;
+   for(int i = 0; i < testdata_count; ++i){
+      int testdata_id;
+      long long timestamp;
+      fscanf(Pipe, "%d %lld", &testdata_id, &timestamp);
+      fout << testdata_id << endl;
+      sout.str("");
+      sout << "./src/fetch_testdata_meta.py " << testdata_id;
+      FILE *Pipe2 = popen(sout.str().c_str(), "r");
+      bool flag = true;
+      sout.str("");
+      sout << dir << "input" << setfill('0') << setw(3) << i;
+      string td(sout.str());
+      ifstream fin(td + ".meta");
+      long long ts;
+      if(fin >> ts){
+         if(ts == timestamp){
+            flag = false;
+         }
+      }
+      if(flag){
+         //need to renew td
+      }
+   }
+   pclose(Pipe);
+   fout.close();
+   return 0;
+}
+
+int fetch_problem(int problem_id, problem &pro)
+{
+   //check if testdata dir exists
+   ostringstream sout;
+   sout << "./testdata/";
+   sout << setfill('0') << setw(4) << problem_id;
+   string testdata_dir(sout.str());
+   if(access(testdata_dir.c_str(), F_OK)){
+      system(("mkdir " + testdata_dir + " 2>/dev/null").c_str());
+   }
+   
+   //download testdata
+   if(download_testdata(problem_id, pro) == -1){
+      return -1;
+   }
+   
+   
+   
+   
    ifstream fin(sout.str());
    int timestamp;
    fin >> timestamp;
@@ -95,7 +149,7 @@ int main()
       cerr << "Recieveed submission [" << sub.submission_id << "]" << endl;
       if(fetch_problem(sub.problem_id, pro) == -1){
          usleep(3000000);
-         cerr << "Can't fetch problem" << endl;
+         cerr << "[ERROR] Can't fetch problem" << endl;
          continue;
       }
       //cout << sub.submitter << ' ' << pro.testdata_count << endl;
