@@ -9,14 +9,28 @@
 #include<sstream>
 #include<fstream>
 #include<iomanip>
+#include"config.h"
 
 using namespace std;
 
+char buff[5000000];
+
 int fetch_submission(submission &sub)
 {
-   cin >> sub.problem_id >> sub.submission_id;
-   sub.source = "#include<iostream>\nusing namespace std; int main(){ int n; cin >> n; int res = 0; while(n--){int a; cin >> a; res += a;} cout << res << endl; return 0;}";
-   cin >> sub.lang >> sub.std >> sub.submitter;
+   FILE* Pipe = popen("./src/fetch_submission.py", "r");
+   fscanf(Pipe, "%d", &sub.submission_id);
+   if(sub.submission_id == -1)
+      return -1;
+   fscanf(Pipe, "%d", &sub.problem_id);
+   //fscanf(Pipe, "%d", &sub.submitter_id);
+   fscanf(Pipe, "%s", buff);
+   sub.lang = buff;
+   sub.std = "c++11";
+   ostringstream sout;
+   while(fgets(buff, 5000000, Pipe) != NULL)
+      sout << buff;
+   sub.source = sout.str();
+   pclose(Pipe);
    return 0;
 }
 
@@ -33,7 +47,7 @@ int fetch_problem(int id, problem &pro)
    fin >> pro.testdata_count;
    switch(pro.problem_type){
       case 0:
-         
+
          break;
       case 1:
          //fetch special judger
@@ -47,7 +61,7 @@ int fetch_problem(int id, problem &pro)
 
 int send_result(result &res)
 {
-   
+
    return 0;
 }
 
@@ -62,13 +76,6 @@ int main()
    if(access("./testzone", F_OK))
       system("mkdir ./testzone");
    
-   /*
-   submission sub;
-   problem pro;
-   result res;
-   testsuite(sub, pro, res);
-   */
-
    while(true){
       submission sub;
       problem pro;
@@ -77,6 +84,14 @@ int main()
          usleep(3000000);
          continue;
       }
+      /*
+      cout << sub.problem_id << ' ';
+      cout << sub.submission_id << ' ';
+      cout << sub.source << ' ';
+      cout << sub.lang << ' ';
+      cout << sub.std << ' ';
+      cout << sub.submitter_id << endl;
+      */
       cerr << "Recieveed submission [" << sub.submission_id << "]" << endl;
       if(fetch_problem(sub.problem_id, pro) == -1){
          usleep(3000000);

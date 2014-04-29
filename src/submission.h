@@ -41,6 +41,7 @@ class submission{
       string lang;
       string std;
       string submitter;
+      int submitter_id;
       submission()
       {
          problem_id = 0;
@@ -49,6 +50,7 @@ class submission{
          lang = "";
          std = "";
          submitter = "";
+         submitter_id = 0;
       }
 };
 #endif
