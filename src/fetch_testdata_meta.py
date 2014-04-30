@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 import sys
 import MySQLdb
@@ -16,8 +16,7 @@ data = cursor.fetchall();
 
 print len(data);
 for it in data:
-   print it[0];
-   print it[1];
+   print it[0], it[1];
 
 db.close();
 

@@ -7,7 +7,7 @@ using namespace std;
 class result{
    public:
       int testdata_count;
-      char verdict[200][10];
+      string verdict[200];
       double score[200];
       int mem[200], time[200];
       result()
