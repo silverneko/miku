@@ -19,8 +19,10 @@ int fetch_submission(submission &sub)
 {
    FILE *Pipe = popen("./src/fetch_submission.py", "r");
    fscanf(Pipe, "%d", &sub.submission_id);
-   if(sub.submission_id == -1)
+   if(sub.submission_id == -1){
+      pclose(Pipe);
       return -1;
+   }
    fscanf(Pipe, "%d", &sub.problem_id);
    //fscanf(Pipe, "%d", &sub.submitter_id);
    fscanf(Pipe, "%s", buff);
@@ -86,16 +88,16 @@ int fetch_problem(int problem_id, problem &pro)
    if(access(testdata_dir.c_str(), F_OK)){
       system(("mkdir " + testdata_dir + " 2>/dev/null").c_str());
    }
-   
+
    //download testdata
    if(download_testdata(problem_id, pro) == -1){
       return -1;
    }
-   
+
    //Batch judge only, haven't done anything for `special`
    //`interactive`, `output only` yet
-   
-   
+
+
    return 0;
 }
 
@@ -127,7 +129,8 @@ int main()
    FILE *Pipe = popen("pwd", "r");
    fgets(buff, 5000000, Pipe);
    string pwd(buff);
-   
+   pclose(Pipe);
+
    while(true){
       submission sub;
       problem pro;

@@ -110,9 +110,13 @@ int testsuite(submission &sub, problem &pro, result &res)
          ++head;
          ++procnum;
       }
-
+      /*
+      getchar();
+      getchar();
+      getchar();
+      */
       int status;
-      pid_t cid = waitpid(-1, &status, WUNTRACED);
+      pid_t cid = waitpid(-1, &status, 0);
       cout << ' ' << cid << endl;
       if(cid == -1){
          perror("[ERROR] in testsuite :");
