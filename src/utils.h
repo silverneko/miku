@@ -1,5 +1,6 @@
-#ifndef SUBMISSION
-#define SUBMISSION
+#ifndef UTILS
+#define UTILS
+
 #include<string>
 
 using namespace std;
@@ -53,4 +54,5 @@ class submission{
          submitter_id = 0;
       }
 };
+
 #endif

@@ -5,6 +5,7 @@ import sys
 
 submission_id = sys.argv[1]
 verdict = sys.argv[2]
+
 if verdict == 'WA':
    verdict = 'Wrong Answer'
 elif verdict == 'AC':

@@ -4,7 +4,7 @@
 #include<unistd.h>
 #include<sstream>
 #include<iomanip>
-#include"submission.h"
+#include"utils.h"
 #include"compile.h"
 #include"sandbox.h"
 #include"config.h"
@@ -61,10 +61,8 @@ string eval(int problem_id, int td)
 
 int testsuite(submission &sub, problem &pro, result &res)
 {
-   sandbox box(10);
-   box.init();
-
-   compile(box, sub);
+   sandboxInit(10);
+   compile(10, sub);
 
    //anyway, only have batch judge right now
    map<pid_t, int> proc;
@@ -105,26 +103,18 @@ int testsuite(submission &sub, problem &pro, result &res)
             exit(0);
             //execl("");
          }
-         proc[pid] = head+1;
+         proc[pid] = head;
          cout << pid << endl;
          ++head;
          ++procnum;
       }
-      /*
-      getchar();
-      getchar();
-      getchar();
-      */
       int status;
       pid_t cid = waitpid(-1, &status, 0);
       cout << ' ' << cid << endl;
       if(cid == -1){
          perror("[ERROR] in testsuite :");
          return -1;
-      }if(proc[cid] == 0){
-         continue;
       }else{
-         --proc[cid];
          res.verdict[proc[cid]] = eval(problem_id, proc[cid]);
          ostringstream sout;
          sout << "./isolate/isolate --box-id=" << 20+proc[cid] 
@@ -135,6 +125,6 @@ int testsuite(submission &sub, problem &pro, result &res)
 
       if(head == pro.testdata_count && procnum == 0) break;
    }
-   box.cleanup();
+   sandboxDele(10);
    return 0;
 }

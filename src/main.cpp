@@ -1,7 +1,7 @@
 #include<iostream>
 #include<algorithm>
 #include<cstdio>
-#include"submission.h"
+#include"utils.h"
 #include"compile.h"
 #include"testsuite.cpp"
 #include<unistd.h>
@@ -104,11 +104,12 @@ int fetch_problem(int problem_id, problem &pro)
 int send_result(int id, result &res)
 {
    string verdict("AC");
-   for(int i = 0; i < res.testdata_count; ++i)
+   for(int i = 0; i < res.testdata_count; ++i){
       if(res.verdict[i] == "WA"){
          verdict = "WA";
          break;
       }
+   }
    ostringstream sout;
    sout << "./src/update_verdict.py " << id << ' ' << verdict;
    system(sout.str().c_str());
@@ -145,6 +146,7 @@ int main()
          cerr << "[ERROR] Can't fetch problem" << endl;
          continue;
       }
+      res.testdata_count = pro.testdata_count;
       testsuite(sub, pro, res);
       send_result(sub.submission_id, res);
    }

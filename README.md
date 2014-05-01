@@ -4,7 +4,7 @@ miku
 ####How to start the judge client
 ```bash
 make
-sudo ./miku
+./start_script
 ```
 
 Remember to start the mySQL server before starting the judge client.
