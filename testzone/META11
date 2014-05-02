@@ -1,8 +1,8 @@
-status:TO
-message:Time limit exceeded
-killed:1
-time:1.640
-time-wall:2.013
-max-rss:432
-csw-voluntary:4
-csw-forced:351
+exitsig:11
+time:0.001
+time-wall:0.028
+max-rss:324
+csw-voluntary:3
+csw-forced:1
+status:SG
+message:Caught fatal signal 11

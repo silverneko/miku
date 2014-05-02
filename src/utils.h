@@ -6,6 +6,7 @@
 using namespace std;
 
 enum RESULTS{
+	OK = 0,
 	AC = 10,
 	WA,
 	TLE,
@@ -14,6 +15,7 @@ enum RESULTS{
 	RE,
 	SIG,
 	CE,
+	CO,
 	ERR
 };
 
@@ -40,6 +42,8 @@ class fromVerdict{
 					return "Exited with Signal";
 				case CE:
 					return "Compile Error";
+				case CO:
+					return "Compiling Timed Out";
 				case ERR:
 				default:
 					return "Congradulations! You just panicked the judge.";

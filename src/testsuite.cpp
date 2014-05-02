@@ -15,11 +15,41 @@ using namespace std;
 
 int compile(int boxid, const submission& target);
 
-RESULTS eval(int problem_id, int td)
+int getExitStatus(string dir)
 {
+   ifstream fin(dir);
+   string line;
+   while(!fin.eof() && getline(fin, line)){
+      for(int i = 0; i < line.size(); ++i)
+         if(line[i] == ':')
+            line[i] = ' ';
+      istringstream in(line);
+      string a, b;
+      in >> a >> b;
+      if(a == "status"){
+         if(b == "XX"){
+            return ERR;
+         }else if(b == "TO"){
+            return TLE;
+         }else{
+            return RE;
+         }
+      }
+   }
+   return OK;
+}
+
+int eval(int problem_id, int td)
+{
+   ostringstream sout;
+   sout << "./testzone/META" << td;
+   int status = getExitStatus(sout.str());
+   if(status != OK)
+      return status;
+   
    int error = 0;
    string s,t;
-   ostringstream sout;
+   sout.str("");
    sout << "./testdata/" << setfill('0') << setw(4) << problem_id
         << "/output" << setw(3) << td;
    fstream tsol(sout.str());
@@ -63,9 +93,8 @@ RESULTS eval(int problem_id, int td)
 int testsuite(submission &sub, problem &pro, result &res)
 {
    sandboxInit(10);
-   if(compile(10, sub) == CE){
-      return CE;
-   }
+   int status = compile(10, sub);
+   if(status != 0) return status;
 
    //anyway, only have batch judge right now
    map<pid_t, int> proc;
@@ -119,6 +148,7 @@ int testsuite(submission &sub, problem &pro, result &res)
          return ERR;
       }else{
          res.verdict[proc[cid]] = eval(problem_id, proc[cid]);
+         cout << res.verdict[proc[cid]] << endl;
          ostringstream sout;
          sout << "./bin/isolate --box-id=" << 20+proc[cid] 
               << " --cleanup";
@@ -154,6 +184,7 @@ int compile(int boxid, const submission& target)
    opt.preserve_env = true;
    opt.errout = "compile_error";
    opt.timeout = 60 * 1000;
+   opt.meta = "./testzone/metacomp";
    
    sandboxExec(boxid, opt, comm);
    if(access((boxdir+"main.out").c_str(), F_OK) == -1){
