@@ -4,12 +4,7 @@ import MySQLdb
 import sys
 
 submission_id = sys.argv[1]
-verdict = sys.argv[2]
-
-if verdict == 'WA':
-   verdict = 'Wrong Answer'
-elif verdict == 'AC':
-   verdict = 'Accepted'
+verdict = " ".join(sys.argv[2:])
 
 db = MySQLdb.connect("localhost", "root", "iloveinfor", "tioj_dev");
 cursor = db.cursor();

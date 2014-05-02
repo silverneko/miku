@@ -1,5 +1,8 @@
-time:0.000
-time-wall:0.019
-max-rss:444
-csw-voluntary:6
-csw-forced:1
+status:TO
+message:Time limit exceeded
+killed:1
+time:1.129
+time-wall:3.028
+max-rss:432
+csw-voluntary:3
+csw-forced:303

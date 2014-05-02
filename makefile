@@ -1,14 +1,22 @@
 CC = clang++
-CFLAG =  -std=c++11 -static
+CFLAGS =  -std=c++11 -static -Wall
+SRC = ./src
+
 
 all: ./bin/miku ./bin/isolate
 
-./bin/miku: ./src/main.cpp ./build/sandbox.o ./src/testsuite.cpp
-	$(CC) -o ./bin/miku ./src/main.cpp ./build/sandbox.o $(CFLAG)
+./bin/miku: ./build/main.o ./build/sandbox.o
+	$(CC) -o ./bin/miku ./build/main.o ./build/sandbox.o $(CFLAGS)
 
-./build/sandbox.o: ./src/sandbox.cpp
-	$(CC) -c ./src/sandbox.cpp -o ./build/sandbox.o $(CFLAG)
+./build/main.o: ./src/main.cpp ./src/testsuite.cpp ./src/config.h
+	$(CC) -o ./build/main.o -c ./src/main.cpp $(CFLAGS)
+	
+./build/sandbox.o: ./src/sandbox.cpp ./src/sandbox.h
+	$(CC) -o ./build/sandbox.o -c ./src/sandbox.cpp $(CFLAGS)
 
 ./bin/isolate:
 	make -C ./isolate/
-	cp ./isolate/isolate ./bin/isolate
+	mv ./isolate/isolate ./bin/isolate
+
+clean :
+	rm ./build/*
