@@ -1,8 +1,0 @@
-exitsig:11
-time:0.001
-time-wall:0.025
-max-rss:328
-csw-voluntary:3
-csw-forced:4
-status:SG
-message:Caught fatal signal 11

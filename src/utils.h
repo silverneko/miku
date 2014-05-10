@@ -16,7 +16,7 @@ enum RESULTS{
 	SIG,
 	CE,
 	CO,
-	ERR
+	ER
 };
 
 class fromVerdict{
@@ -44,7 +44,7 @@ class fromVerdict{
 					return "Compile Error";
 				case CO:
 					return "Compiling Timed Out";
-				case ERR:
+				case ER:
 				default:
 					return "Congradulations! You just panicked the judge.";
 			}
