@@ -1,6 +1,6 @@
 #ifndef CONFIGED
 #define CONFIGED
 
-const int MAXPARNUM = 8;
+const int MAXPARNUM = 6;
 
 #endif

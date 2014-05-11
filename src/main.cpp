@@ -16,7 +16,7 @@ char buff[5000000];
 
 int fetch_submission(submission &sub)
 {
-   FILE *Pipe = popen("./apps/fetch_submission.py", "r");
+   FILE *Pipe = popen("fetch_submission.py", "r");
    fscanf(Pipe, "%d", &sub.submission_id);
    if(sub.submission_id == -1){
       pclose(Pipe);
@@ -43,7 +43,7 @@ int download_testdata(int problem_id, problem &pro)
    string dir(sout.str());
 
    sout.str("");
-   sout << "./apps/fetch_testdata_meta.py " << problem_id;
+   sout << "fetch_testdata_meta.py " << problem_id;
    FILE *Pipe = popen(sout.str().c_str(), "r");
    int testdata_count;
    fscanf(Pipe, "%d", &testdata_count);
@@ -68,7 +68,7 @@ int download_testdata(int problem_id, problem &pro)
          //need to renew td
          sout.str("");
          sout << testdata_id << ' ' << problem_id << ' ' << i;
-         system(("./apps/fetch_testdata.py " + sout.str()).c_str());
+         system(("fetch_testdata.py " + sout.str()).c_str());
          ofstream fout(td + ".meta");
          fout << timestamp << endl;
       }
@@ -81,7 +81,7 @@ int fetch_problem(int problem_id, problem &pro)
 {
    //get memlimit, timelimit
    ostringstream sout;
-   sout << "./apps/fetch_limits.py " << problem_id;
+   sout << "fetch_limits.py " << problem_id;
    FILE *Pipe = popen(sout.str().c_str(), "r");
    fscanf(Pipe, "%d %d", &pro.time_limit, &pro.mem_limit);
    pclose(Pipe);
@@ -113,7 +113,7 @@ int send_result(int id, result &res, int verdict)
       verdict = max(verdict, res.verdict[i]);
    
    ostringstream sout;
-   sout << "./apps/update_verdict.py " << id << ' ' << fromVerdict(verdict).to_str();
+   sout << "update_verdict.py " << id << ' ' << fromVerdict(verdict).to_str();
    system(sout.str().c_str());
    return 0;
 }

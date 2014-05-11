@@ -1,3 +1,4 @@
 #!/bin/bash
 
-sudo ./bin/miku
+export PATH=$PATH:./apps:./bin
+sudo miku

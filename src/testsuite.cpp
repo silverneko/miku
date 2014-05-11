@@ -83,7 +83,7 @@ int testsuite(submission &sub, problem &pro, result &res)
          system(("cp /tmp/box/10/box/main.out" + sout.str() + "main").c_str());
          //
          ostringstream command;
-         command << "./bin/batchjudge " << judgeid;
+         command << "batchjudge " << judgeid;
          command << " " << time_limit;
          command << " " << mem_limit;
          //
