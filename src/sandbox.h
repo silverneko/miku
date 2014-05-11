@@ -1,41 +1,30 @@
 #ifndef SANDBOX
 #define SANDBOX
-#include <sstream>
-#include <cstdlib>
+
+#include <string>
+#include <vector>
 
 using namespace std;
 
-class sandbox{
-   private:
-      int box_id;
-      string comm;
+class sandboxOptions{
    public:
-      sandbox(int id) : box_id(id)
-      {
-         ostringstream sout;
-         sout << "./isolate/isolate --wall-time=30 --dir=/etc/ "
-              << "-e --processes=50 --stderr=compile_error --box-id="
-              << id << " ";
-         comm = sout.str();
-      }
-      int id()
-      {
-         return box_id;
-      }
-      void init()
-      {
-         system((comm + " --init 2>/dev/null >/dev/null").c_str());
-         cerr << "[debug] box-10 inited" << endl;
-      }
-      void cleanup()
-      {
-         system((comm + " --cleanup 2>/dev/null >/dev/null").c_str());
-         cerr << "[debug] box-10 cleaned" << endl;
-      }
-      void execute(const string &ex)
-      {
-         system((comm + " --run -- " + ex + " 2>/dev/null >/dev/null").c_str());
-      }
+      bool cgroup;         //--cg
+      bool preserve_env;   //--full-env
+      vector<string> dirs; //--dir
+      string input;        //--stdin
+      string output;       //--stdout
+      string errout;       //--stderr
+      string meta;         //--meta
+      int mem;             //--mem in kilobytes
+      int procs;           //--processes
+      int timeout;         //--time in ms
+      sandboxOptions() : cgroup(false), preserve_env(false), mem(0), procs(1), timeout(0) {}
 };
+
+int sandboxInit(int boxid);
+
+int sandboxExec(int boxid, const sandboxOptions &option, const string &command);
+
+int sandboxDele(int boxid);
 
 #endif

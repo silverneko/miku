@@ -2,7 +2,7 @@
 # (c) 2012 Martin Mares <mj@ucw.cz>
 # (c) 2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
 
-isolate: isolate.c
+isolate: isolate.c autoconf.h
 	gcc -o isolate isolate.c -O2 -Wall -Wno-parentheses -Wno-unused-result -g -std=c99
 
 isolate.1: isolate.1.txt

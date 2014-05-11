@@ -1,8 +1,7 @@
 #include<iostream>
 #include<algorithm>
 #include<cstdio>
-#include"submission.h"
-#include"compile.h"
+#include"utils.h"
 #include"testsuite.cpp"
 #include<unistd.h>
 #include<sys/types.h>
@@ -17,10 +16,12 @@ char buff[5000000];
 
 int fetch_submission(submission &sub)
 {
-   FILE *Pipe = popen("./src/fetch_submission.py", "r");
+   FILE *Pipe = popen("fetch_submission.py", "r");
    fscanf(Pipe, "%d", &sub.submission_id);
-   if(sub.submission_id == -1)
+   if(sub.submission_id == -1){
+      pclose(Pipe);
       return -1;
+   }
    fscanf(Pipe, "%d", &sub.problem_id);
    //fscanf(Pipe, "%d", &sub.submitter_id);
    fscanf(Pipe, "%s", buff);
@@ -42,7 +43,7 @@ int download_testdata(int problem_id, problem &pro)
    string dir(sout.str());
 
    sout.str("");
-   sout << "./src/fetch_testdata_meta.py " << problem_id;
+   sout << "fetch_testdata_meta.py " << problem_id;
    FILE *Pipe = popen(sout.str().c_str(), "r");
    int testdata_count;
    fscanf(Pipe, "%d", &testdata_count);
@@ -67,7 +68,7 @@ int download_testdata(int problem_id, problem &pro)
          //need to renew td
          sout.str("");
          sout << testdata_id << ' ' << problem_id << ' ' << i;
-         system(("./src/fetch_testdata.py " + sout.str()).c_str());
+         system(("fetch_testdata.py " + sout.str()).c_str());
          ofstream fout(td + ".meta");
          fout << timestamp << endl;
       }
@@ -78,37 +79,41 @@ int download_testdata(int problem_id, problem &pro)
 
 int fetch_problem(int problem_id, problem &pro)
 {
-   //check if testdata dir exists
+   //get memlimit, timelimit
    ostringstream sout;
+   sout << "fetch_limits.py " << problem_id;
+   FILE *Pipe = popen(sout.str().c_str(), "r");
+   fscanf(Pipe, "%d %d", &pro.time_limit, &pro.mem_limit);
+   pclose(Pipe);
+   
+   //check if testdata dir exists
+   sout.str("");
    sout << "./testdata/";
    sout << setfill('0') << setw(4) << problem_id;
    string testdata_dir(sout.str());
    if(access(testdata_dir.c_str(), F_OK)){
       system(("mkdir " + testdata_dir + " 2>/dev/null").c_str());
    }
-   
+
    //download testdata
    if(download_testdata(problem_id, pro) == -1){
       return -1;
    }
-   
+
    //Batch judge only, haven't done anything for `special`
    //`interactive`, `output only` yet
-   
-   
+
+
    return 0;
 }
 
-int send_result(int id, result &res)
+int send_result(int id, result &res, int verdict)
 {
-   string verdict("AC");
    for(int i = 0; i < res.testdata_count; ++i)
-      if(res.verdict[i] == "WA"){
-         verdict = "WA";
-         break;
-      }
+      verdict = max(verdict, res.verdict[i]);
+   
    ostringstream sout;
-   sout << "./src/update_verdict.py " << id << ' ' << verdict;
+   sout << "update_verdict.py " << id << ' ' << fromVerdict(verdict).to_str();
    system(sout.str().c_str());
    return 0;
 }
@@ -127,7 +132,8 @@ int main()
    FILE *Pipe = popen("pwd", "r");
    fgets(buff, 5000000, Pipe);
    string pwd(buff);
-   
+   pclose(Pipe);
+
    while(true){
       submission sub;
       problem pro;
@@ -142,8 +148,9 @@ int main()
          cerr << "[ERROR] Can't fetch problem" << endl;
          continue;
       }
-      testsuite(sub, pro, res);
-      send_result(sub.submission_id, res);
+      res.testdata_count = pro.testdata_count;
+      int verdict = testsuite(sub, pro, res);
+      send_result(sub.submission_id, res, verdict);
    }
 
 

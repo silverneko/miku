@@ -1,21 +1,166 @@
 #include<iostream>
-#include<algorithm>
 #include<cstdio>
-#include<unistd.h>
 #include<sstream>
+#include<fstream>
 #include<iomanip>
-#include"submission.h"
-#include"compile.h"
-#include"sandbox.h"
-#include"config.h"
+#include<unistd.h>
 #include<map>
 #include<sys/types.h>
 #include<sys/wait.h>
+#include"utils.h"
+#include"sandbox.h"
+#include"config.h"
 
 using namespace std;
 
-string eval(int problem_id, int td)
+int compile(int boxid, const submission& target);
+int eval(int, int);
+
+int getExitStatus(int td)
 {
+   ostringstream sout;
+   sout << "./testzone/META" << td;
+   ifstream fin(sout.str());
+   string line;
+   while(!fin.eof() && getline(fin, line)){
+      for(int i = 0; i < line.size(); ++i)
+         if(line[i] == ':')
+            line[i] = ' ';
+      istringstream in(line);
+      string a, b;
+      in >> a >> b;
+      if(a == "status"){
+         if(b == "XX"){
+            return ER;
+         }else if(b == "TO"){
+            return TLE;
+         }else{
+            return RE;
+         }
+      }
+   }
+   return OK;
+}
+
+int testsuite(submission &sub, problem &pro, result &res)
+{
+   sandboxInit(10);
+   int status = compile(10, sub);
+   if(status != 0) return status;
+
+   //anyway, only have batch judge right now
+   map<pid_t, int> proc;
+   int procnum = 0;
+   int problem_id = sub.problem_id;
+   int time_limit = pro.time_limit;
+   int mem_limit = pro.mem_limit;
+
+   for(int i = 0; i < pro.testdata_count; ++i){
+      while(procnum >= MAXPARNUM){
+         int status;
+         pid_t cid = waitpid(-1, &status, 0);
+         cout << ' ' << cid << endl;
+         if(cid == -1){
+            perror("[ERROR] in testsuite,  `waitpid()` failed :");
+            return ER;
+         }
+         const int td = proc[cid];
+         res.verdict[td] = eval(problem_id, td);
+         cout << "td" << td << " : " << res.verdict[td] << endl;
+         sandboxDele(20+td);
+         --procnum;
+      }
+      
+      if(procnum < MAXPARNUM){
+         const int judgeid = 20 + i;
+         ostringstream sout;
+         sout << "./testdata/" << setfill('0') << setw(4) << problem_id;
+         sout << "/input" << setfill('0') << setw(3) << i;
+         string tddir(sout.str());
+         sout.str("");
+         sout << " /tmp/box/" << judgeid << "/box/";
+         system(("cp " + tddir + sout.str() + "input").c_str());
+         system(("cp /tmp/box/10/box/main.out" + sout.str() + "main").c_str());
+         //
+         ostringstream command;
+         command << "batchjudge " << judgeid;
+         command << " " << time_limit;
+         command << " " << mem_limit;
+         //
+         pid_t pid = fork();
+         if(pid == -1){
+            perror("[ERROR] in testsuite, `fork()` failed :");
+            return -1;
+         }
+         if(pid == 0){
+            //child proc
+            execl("/bin/sh", "-c", command.str().c_str());
+            perror("[ERROR] in testsuite, `execl()` failed :");
+            exit(0);
+         }
+         proc[pid] = i;
+         cout << "td" << i << " : " << pid << endl;
+         ++procnum;
+      }
+   }
+   while(procnum >= 1){
+      int status;
+      pid_t cid = waitpid(-1, &status, 0);
+      cout << ' ' << cid << endl;
+      if(cid == -1){
+         perror("[ERROR] in testsuite,  `waitpid()` failed :");
+         return ER;
+      }
+      const int td = proc[cid];
+      res.verdict[td] = eval(problem_id, td);
+      cout << "td" << td << " : " << res.verdict[td] << endl;
+      sandboxDele(20+td);
+      --procnum;
+   }
+   //clear box-10
+   sandboxDele(10);
+
+   return 0;
+}
+
+int compile(int boxid, const submission& target)
+{
+   ostringstream sout;
+   sout << "/tmp/box/" << boxid << "/box/";
+   string boxdir(sout.str());
+   
+   ofstream fout(boxdir + "main.cpp");
+   fout << target.source << flush;
+   fout.close();
+   
+   sout.str("");
+   if(target.lang == "c++"){
+      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 -static ";
+      sout << " -std=" << target.std << " ";// << " 2>/dev/null ";
+   }
+   string comm(sout.str());
+   sandboxOptions opt;
+   opt.dirs.push_back("/etc/");
+   opt.procs = 50;
+   opt.preserve_env = true;
+   opt.errout = "compile_error";
+   opt.timeout = 60 * 1000;
+   opt.meta = "./testzone/metacomp";
+   
+   sandboxExec(boxid, opt, comm);
+   if(access((boxdir+"main.out").c_str(), F_OK) == -1){
+      return CE;
+   }
+   
+   return 0;
+}
+
+int eval(int problem_id, int td)
+{
+   int status = getExitStatus(td);
+   if(status != OK)
+      return status;
+   
    int error = 0;
    string s,t;
    ostringstream sout;
@@ -43,94 +188,14 @@ string eval(int problem_id, int td)
       }
       s.erase(s.find_last_not_of(" \n\r\t")+1);
       t.erase(t.find_last_not_of(" \n\r\t")+1);
-      if(s!=t){/*
-                  printf("%s\n",s[i]);
-                  printf("%s\n",t);
-                  printf("%d %d\n",strlen(s),strlen(t));
-                  printf("%d %d\n",s[strlen(s)-1],t[strlen(t)-1]);*/
+      if(s!=t){
          error=1;
          break;
       }
    }
    
    if(error)
-      return string("WA");
+      return WA;
    else
-      return string("AC");
-}
-
-int testsuite(submission &sub, problem &pro, result &res)
-{
-   sandbox box(10);
-   box.init();
-
-   compile(box, sub);
-
-   //anyway, only have batch judge right now
-   map<pid_t, int> proc;
-   int head = 0, procnum = 0;
-   int problem_id = sub.problem_id;
-   while(true){
-      while(procnum < MAXPARNUM && head < pro.testdata_count){
-         pid_t pid = fork();
-         if(pid == -1){
-            perror("[ERROR] in testsuite :");
-            return -1;
-         }
-         if(pid == 0){
-            //child proc
-            ostringstream command;
-            command << "./isolate/isolate --box-id=" << 20 + head;
-            command << " --mem=" << pro.mem_limit;
-            command << " --time=" << fixed << pro.time_limit / 1000.0;
-            command << " --wall-time=" << fixed << pro.time_limit / 200.0;
-            command << " --extra-time=" << fixed << 0.1;
-            command << " --meta=" << "./testzone/META" << head;
-            command << " --processes=" << 1;
-            system((command.str() + " --init").c_str());
-            ostringstream sout;
-            sout << "./testdata/" << setfill('0') << setw(4) << problem_id;
-            sout << "/input" << setfill('0') << setw(3) << head;
-            string tddir(sout.str());
-            sout.str("");
-            sout << " /tmp/box/" << 20 + head << "/box/";
-            system(("cp " + tddir + sout.str() + "input").c_str());
-            system(("cp /tmp/box/10/box/main.out" + sout.str() + "main").c_str());
-            command << " --stdin=" << "input";
-            command << " --stdout=" << "output";
-            command << " --stderr=" << "/dev/null";
-            command << " --dir=/tmp/box/10/box/";
-            command << " --run -- " << "main"; //"/tmp/box/10/box/main.out";
-            system(command.str().c_str());
-            exit(0);
-            //execl("");
-         }
-         proc[pid] = head+1;
-         cout << pid << endl;
-         ++head;
-         ++procnum;
-      }
-
-      int status;
-      pid_t cid = waitpid(-1, &status, WUNTRACED);
-      cout << ' ' << cid << endl;
-      if(cid == -1){
-         perror("[ERROR] in testsuite :");
-         return -1;
-      }if(proc[cid] == 0){
-         continue;
-      }else{
-         --proc[cid];
-         res.verdict[proc[cid]] = eval(problem_id, proc[cid]);
-         ostringstream sout;
-         sout << "./isolate/isolate --box-id=" << 20+proc[cid] 
-              << " --cleanup";
-         system(sout.str().c_str());
-         --procnum;
-      }
-
-      if(head == pro.testdata_count && procnum == 0) break;
-   }
-   box.cleanup();
-   return 0;
+      return AC;
 }
