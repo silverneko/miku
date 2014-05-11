@@ -3,7 +3,7 @@ CFLAGS =  -std=c++11 -static -Wall
 SRC = ./src
 
 
-all: ./bin/miku ./bin/isolate ./bin/batchjudge
+all: | ./bin ./build ./bin/miku ./bin/isolate ./bin/batchjudge
 
 ./bin/miku: ./build/main.o ./build/sandbox.o
 	$(CC) -o ./bin/miku ./build/main.o ./build/sandbox.o $(CFLAGS)
@@ -24,5 +24,11 @@ all: ./bin/miku ./bin/isolate ./bin/batchjudge
 	make -C ./isolate/
 	mv ./isolate/isolate ./bin/isolate
 
-clean :
-	rm ./build/*
+./bin:
+	mkdir ./bin
+
+./build:
+	mkdir ./build
+
+clean:
+	rm -f -r ./build/*
