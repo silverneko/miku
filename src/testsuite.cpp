@@ -94,7 +94,7 @@ int testsuite(submission &sub, problem &pro, result &res)
          }
          if(pid == 0){
             //child proc
-            execl("/bin/sh", "-c", command.str().c_str());
+            execl("/bin/sh", "sh", "-c", command.str().c_str(), NULL);
             perror("[ERROR] in testsuite, `execl()` failed :");
             exit(0);
          }
