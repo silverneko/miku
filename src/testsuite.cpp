@@ -73,6 +73,7 @@ int testsuite(submission &sub, problem &pro, result &res)
       
       if(procnum < MAXPARNUM){
          const int judgeid = 20 + i;
+         /*
          ostringstream sout;
          sout << "./testdata/" << setfill('0') << setw(4) << problem_id;
          sout << "/input" << setfill('0') << setw(3) << i;
@@ -80,10 +81,12 @@ int testsuite(submission &sub, problem &pro, result &res)
          sout.str("");
          sout << " /tmp/box/" << judgeid << "/box/";
          system(("cp " + tddir + sout.str() + "input").c_str());
-         system(("cp /tmp/box/10/box/main.out" + sout.str() + "main").c_str());
+         system(("cp /tmp/box/10/box/main.out" + sout.str() + "main.out").c_str());
+         */
          //
          ostringstream command;
-         command << "batchjudge " << judgeid;
+         command << "batchjudge " << problem_id;
+         command << " " << judgeid;
          command << " " << time_limit;
          command << " " << mem_limit;
          //
