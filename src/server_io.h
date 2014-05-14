@@ -6,10 +6,10 @@
 
 int fetch_submission(submission &);
 
-int download_testdata(int problem_id, problem &);
+int download_testdata(submission &);
 
-int fetch_problem(int problem_id, problem &);
+int fetch_problem(submission &);
 
-int send_result(int submission_id, result &, int verdict);
+int send_result(submission &, int verdict);
 
 #endif

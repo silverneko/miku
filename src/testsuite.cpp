@@ -16,6 +16,81 @@ using namespace std;
 
 int compile(int boxid, const submission& target);
 int eval(int problem_id, int td);
+int getExitStatus(int td);
+
+int testsuite(submission &sub)
+{
+   sandboxInit(10);
+   int status = compile(10, sub);
+   if(status != 0) return status;
+
+   //anyway, only have batch judge right now
+   map<pid_t, int> proc;
+   int procnum = 0;
+   int problem_id = sub.problem_id;
+   int time_limit = sub.time_limit;
+   int mem_limit = sub.mem_limit;
+
+   for(int i = 0; i < sub.testdata_count; ++i){
+      while(procnum >= MAXPARNUM){
+         int status;
+         pid_t cid = waitpid(-1, &status, 0);
+         cerr << ' ' << cid << endl;
+         if(cid == -1){
+            perror("[ERROR] in testsuite,  `waitpid()` failed :");
+            return ER;
+         }
+         const int td = proc[cid];
+         sub.verdict[td] = eval(problem_id, td);
+         cerr << "td" << td << " : " << sub.verdict[td] << endl;
+         sandboxDele(20+td);
+         --procnum;
+      }
+      
+      if(procnum < MAXPARNUM){
+         const int judgeid = 20 + i;
+         //batch judge
+         ostringstream command;
+         command << "batchjudge " << problem_id;
+         command << " " << judgeid;
+         command << " " << time_limit;
+         command << " " << mem_limit;
+         //
+         pid_t pid = fork();
+         if(pid == -1){
+            perror("[ERROR] in testsuite, `fork()` failed :");
+            return -1;
+         }
+         if(pid == 0){
+            //child proc
+            execl("/bin/sh", "sh", "-c", command.str().c_str(), NULL);
+            perror("[ERROR] in testsuite, `execl()` failed :");
+            exit(0);
+         }
+         proc[pid] = i;
+         cerr << "td" << i << " : " << pid << endl;
+         ++procnum;
+      }
+   }
+   while(procnum >= 1){
+      int status;
+      pid_t cid = waitpid(-1, &status, 0);
+      cerr << ' ' << cid << endl;
+      if(cid == -1){
+         perror("[ERROR] in testsuite,  `waitpid()` failed :");
+         return ER;
+      }
+      const int td = proc[cid];
+      sub.verdict[td] = eval(problem_id, td);
+      cerr << "td" << td << " : " << sub.verdict[td] << endl;
+      sandboxDele(20+td);
+      --procnum;
+   }
+   //clear box-10
+   sandboxDele(10);
+
+   return 0;
+}
 
 int getExitStatus(int td)
 {
@@ -41,90 +116,6 @@ int getExitStatus(int td)
       }
    }
    return OK;
-}
-
-int testsuite(submission &sub, problem &pro, result &res)
-{
-   sandboxInit(10);
-   int status = compile(10, sub);
-   if(status != 0) return status;
-
-   //anyway, only have batch judge right now
-   map<pid_t, int> proc;
-   int procnum = 0;
-   int problem_id = sub.problem_id;
-   int time_limit = pro.time_limit;
-   int mem_limit = pro.mem_limit;
-
-   for(int i = 0; i < pro.testdata_count; ++i){
-      while(procnum >= MAXPARNUM){
-         int status;
-         pid_t cid = waitpid(-1, &status, 0);
-         cout << ' ' << cid << endl;
-         if(cid == -1){
-            perror("[ERROR] in testsuite,  `waitpid()` failed :");
-            return ER;
-         }
-         const int td = proc[cid];
-         res.verdict[td] = eval(problem_id, td);
-         cout << "td" << td << " : " << res.verdict[td] << endl;
-         sandboxDele(20+td);
-         --procnum;
-      }
-      
-      if(procnum < MAXPARNUM){
-         const int judgeid = 20 + i;
-         /*
-         ostringstream sout;
-         sout << "./testdata/" << setfill('0') << setw(4) << problem_id;
-         sout << "/input" << setfill('0') << setw(3) << i;
-         string tddir(sout.str());
-         sout.str("");
-         sout << " /tmp/box/" << judgeid << "/box/";
-         system(("cp " + tddir + sout.str() + "input").c_str());
-         system(("cp /tmp/box/10/box/main.out" + sout.str() + "main.out").c_str());
-         */
-         //
-         ostringstream command;
-         command << "batchjudge " << problem_id;
-         command << " " << judgeid;
-         command << " " << time_limit;
-         command << " " << mem_limit;
-         //
-         pid_t pid = fork();
-         if(pid == -1){
-            perror("[ERROR] in testsuite, `fork()` failed :");
-            return -1;
-         }
-         if(pid == 0){
-            //child proc
-            execl("/bin/sh", "sh", "-c", command.str().c_str(), NULL);
-            perror("[ERROR] in testsuite, `execl()` failed :");
-            exit(0);
-         }
-         proc[pid] = i;
-         cout << "td" << i << " : " << pid << endl;
-         ++procnum;
-      }
-   }
-   while(procnum >= 1){
-      int status;
-      pid_t cid = waitpid(-1, &status, 0);
-      cout << ' ' << cid << endl;
-      if(cid == -1){
-         perror("[ERROR] in testsuite,  `waitpid()` failed :");
-         return ER;
-      }
-      const int td = proc[cid];
-      res.verdict[td] = eval(problem_id, td);
-      cout << "td" << td << " : " << res.verdict[td] << endl;
-      sandboxDele(20+td);
-      --procnum;
-   }
-   //clear box-10
-   sandboxDele(10);
-
-   return 0;
 }
 
 int compile(int boxid, const submission& target)

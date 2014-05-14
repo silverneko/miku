@@ -19,15 +19,15 @@ int main(int argc, char *argv[])
    bool verbose = false;
    for(int i = 1; i < argc; ++i){
       if(argv[i][0] == '-'){
-         if(argv[i][1] == '-'){
-            string opt(argv[i]+2);
-            if(opt == "verbose"){
+         string option(argv[i]+1);
+         if(option[0] == '-'){
+            if(option == "-verbose"){
                verbose = true;
             }else{
             
             }
          }else{
-            switch(argv[i][1]){
+            switch(option[0]){
                case 'v':
                   verbose = true;
                   break;
@@ -53,21 +53,19 @@ int main(int argc, char *argv[])
 
    while(true){
       submission sub;
-      problem pro;
-      result res;
       if(fetch_submission(sub) == -1){
          usleep(3000000);
          continue;
       }
       cerr << "Recieveed submission [" << sub.submission_id << "]" << endl;
-      if(fetch_problem(sub.problem_id, pro) == -1){
+      if(fetch_problem(sub) == -1){
          usleep(3000000);
          cerr << "[ERROR] Can't fetch problem" << endl;
          continue;
       }
-      res.testdata_count = pro.testdata_count;
-      int verdict = testsuite(sub, pro, res);
-      send_result(sub.submission_id, res, verdict);
+      
+      int verdict = testsuite(sub);
+      send_result(sub, verdict);
    }
 
 

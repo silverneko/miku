@@ -51,37 +51,9 @@ class fromVerdict{
 		}
 };
 
-class result{
-   public:
-      int testdata_count;
-      int verdict[200];
-      double score[200];
-      int mem[200], time[200];
-      result()
-      {
-         testdata_count = 0;
-      }
-};
-
-class problem{
-   public:
-      int problem_type;
-      string special_judge;
-      int mem_limit;
-      int time_limit;
-      int testdata_count;
-      problem()
-      {
-         problem_type = 0;
-         special_judge = "";
-         mem_limit = 0;
-         time_limit = 0;
-         testdata_count = 0;
-      }
-};
-
 class submission{
    public:
+      //meta
       int problem_id;
       int submission_id;
       string source;
@@ -89,6 +61,17 @@ class submission{
       string std;
       string submitter;
       int submitter_id;
+      //problem
+      int problem_type;
+      string special_judge;
+      int mem_limit;
+      int time_limit;
+      int testdata_count;
+      //test result
+      int verdict[200];
+      double score[200];
+      int mem[200], time[200];
+      
       submission()
       {
          problem_id = 0;
@@ -98,6 +81,12 @@ class submission{
          std = "";
          submitter = "";
          submitter_id = 0;
+
+         problem_type = 0;
+         special_judge = "";
+         mem_limit = 0;
+         time_limit = 0;
+         testdata_count = 0;
       }
 };
 

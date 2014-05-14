@@ -2,6 +2,6 @@
 #define TESTSUITE
 #include"utils.h"
 
-int testsuite(submission&, problem&, result&);
+int testsuite(submission&);
 
 #endif
