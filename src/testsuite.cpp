@@ -10,11 +10,12 @@
 #include"utils.h"
 #include"sandbox.h"
 #include"config.h"
+#include"testsuite.h"
 
 using namespace std;
 
 int compile(int boxid, const submission& target);
-int eval(int, int);
+int eval(int problem_id, int td);
 
 int getExitStatus(int td)
 {

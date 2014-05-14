@@ -2,6 +2,4 @@
 
 mkdir -p ./testdata
 mkdir -p ./testzone
-
-export PATH=$PATH:./apps:./bin
-sudo env PATH=$PATH miku
+sudo env PATH=$PATH:./apps:./bin miku --verbose
