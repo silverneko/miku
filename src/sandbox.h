@@ -15,10 +15,10 @@ class sandboxOptions{
       string output;       //--stdout
       string errout;       //--stderr
       string meta;         //--meta
-      int mem;             //--mem in kilobytes
+      int mem;             //--cg-mem in kilobytes
       int procs;           //--processes
       int timeout;         //--time in ms
-      sandboxOptions() : cgroup(false), preserve_env(false), mem(0), procs(1), timeout(0) {}
+      sandboxOptions() : cgroup(true), preserve_env(false), mem(0), procs(1), timeout(0) {}
 };
 
 int sandboxInit(int boxid);
