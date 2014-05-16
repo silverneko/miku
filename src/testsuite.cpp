@@ -15,14 +15,15 @@
 using namespace std;
 
 int compile(int boxid, const submission& target);
-int eval(int problem_id, int td);
-int getExitStatus(int td);
+void eval(submission &sub, int td);
+void getExitStatus(submission &sub, int td);
 
 int testsuite(submission &sub)
 {
+   system("rm -f ./testzone/*");
    sandboxInit(10);
    int status = compile(10, sub);
-   if(status != 0) return status;
+   if(status != OK) return status;
 
    //anyway, only have batch judge right now
    map<pid_t, int> proc;
@@ -35,14 +36,13 @@ int testsuite(submission &sub)
       while(procnum >= MAXPARNUM){
          int status;
          pid_t cid = waitpid(-1, &status, 0);
-         cerr << ' ' << cid << endl;
          if(cid == -1){
             perror("[ERROR] in testsuite,  `waitpid()` failed :");
             return ER;
          }
          const int td = proc[cid];
-         sub.verdict[td] = eval(problem_id, td);
-         cerr << "td" << td << " : " << sub.verdict[td] << endl;
+         eval(sub, td);
+         //cerr << "td" << td << " : " << sub.verdict[td] << endl;
          sandboxDele(20+td);
          --procnum;
       }
@@ -68,36 +68,36 @@ int testsuite(submission &sub)
             exit(0);
          }
          proc[pid] = i;
-         cerr << "td" << i << " : " << pid << endl;
          ++procnum;
       }
    }
    while(procnum >= 1){
       int status;
       pid_t cid = waitpid(-1, &status, 0);
-      cerr << ' ' << cid << endl;
       if(cid == -1){
          perror("[ERROR] in testsuite,  `waitpid()` failed :");
          return ER;
       }
       const int td = proc[cid];
-      sub.verdict[td] = eval(problem_id, td);
-      cerr << "td" << td << " : " << sub.verdict[td] << endl;
+      //sub.verdict[td] = eval(problem_id, td);
+      eval(sub, td);
+      //cerr << "td" << td << " : " << sub.verdict[td] << endl;
       sandboxDele(20+td);
       --procnum;
    }
    //clear box-10
    sandboxDele(10);
 
-   return 0;
+   return OK;
 }
 
-int getExitStatus(int td)
+void getExitStatus(submission &sub, int td)
 {
    ostringstream sout;
    sout << "./testzone/META" << td;
    ifstream fin(sout.str());
    string line;
+   map<string,string> META;
    while(!fin.eof() && getline(fin, line)){
       for(int i = 0; i < line.size(); ++i)
          if(line[i] == ':')
@@ -105,17 +105,75 @@ int getExitStatus(int td)
       istringstream in(line);
       string a, b;
       in >> a >> b;
-      if(a == "status"){
-         if(b == "XX"){
-            return ER;
-         }else if(b == "TO"){
-            return TLE;
-         }else{
-            return RE;
-         }
+      META[a] = b;
+   }
+   
+   //mem_used
+   sub.mem[td] = cast(META["cg-mem"]).to<int>();
+   //time_used
+   sub.time[td] = 1000 * cast(META["time"]).to<double>();
+   //verdict
+   if(META["status"] == ""){
+      sub.verdict[td] = OK;
+   }else if(META["status"] == "TO"){
+      sub.verdict[td] = TLE;
+   }else if(META["status"] == "SG"){
+      switch(cast(META["exitsig"]).to<int>()){
+         case 11:
+            sub.verdict[td] = MLE;
+            break;
+         default :
+            sub.verdict[td] = RE;
+      }
+   }else if(META["status"] == "RE"){
+      sub.verdict[td] = RE;
+   }else{
+      // "XX"
+      sub.verdict[td] = ER;
+   }
+   //return verdict;
+}
+
+void eval(submission &sub, int td)
+{
+   int problem_id = sub.problem_id;
+   getExitStatus(sub, td);
+   
+   int status = AC;
+   string s,t;
+   //solution output
+   ostringstream sout;
+   sout << "./testdata/" << setfill('0') << setw(4) << problem_id
+        << "/output" << setw(3) << td;
+   fstream tsol(sout.str());
+   //user output
+   sout.str("");
+   sout << "/tmp/box/" << 20 + td << "/box/output";
+   fstream mout(sout.str());
+   while(1){
+      s="";
+      t="";
+      getline(tsol,s);
+      getline(mout,t);
+      if(t==""&&s!=""){
+         status = WA;
+         break;
+      }
+      if(t!=""&&s==""){
+         status = WA;
+         break;
+      }
+      if(t==""&&s==""){
+         break;
+      }
+      s.erase(s.find_last_not_of(" \n\r\t")+1);
+      t.erase(t.find_last_not_of(" \n\r\t")+1);
+      if(s!=t){
+         status = WA;
+         break;
       }
    }
-   return OK;
+   sub.verdict[td] = max(sub.verdict[td], status);
 }
 
 int compile(int boxid, const submission& target)
@@ -147,50 +205,5 @@ int compile(int boxid, const submission& target)
       return CE;
    }
    
-   return 0;
-}
-
-int eval(int problem_id, int td)
-{
-   int status = getExitStatus(td);
-   if(status != OK)
-      return status;
-   
-   int error = 0;
-   string s,t;
-   ostringstream sout;
-   sout << "./testdata/" << setfill('0') << setw(4) << problem_id
-        << "/output" << setw(3) << td;
-   fstream tsol(sout.str());
-   sout.str("");
-   sout << "/tmp/box/" << 20 + td << "/box/output";
-   fstream mout(sout.str());
-   while(1){
-      s="";
-      t="";
-      getline(tsol,s);
-      getline(mout,t);
-      if(t==""&&s!=""){
-         error=1;
-         break;
-      }
-      if(t!=""&&s==""){
-         error=1;
-         break;
-      }
-      if(t==""&&s==""){
-         break;
-      }
-      s.erase(s.find_last_not_of(" \n\r\t")+1);
-      t.erase(t.find_last_not_of(" \n\r\t")+1);
-      if(s!=t){
-         error=1;
-         break;
-      }
-   }
-   
-   if(error)
-      return WA;
-   else
-      return AC;
+   return OK;
 }

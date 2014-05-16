@@ -4,12 +4,12 @@
 #include"utils.h"
 #include"config.h"
 
-int fetch_submission(submission &);
+int fetchSubmission(submission &);
 
-int download_testdata(submission &);
+int downloadTestdata(submission &);
 
-int fetch_problem(submission &);
+int fetchProblem(submission &);
 
-int send_result(submission &, int verdict);
+int sendResult(submission &, int verdict);
 
 #endif

@@ -23,7 +23,7 @@ class sandboxOptions{
 
 int sandboxInit(int boxid);
 
-int sandboxExec(int boxid, const sandboxOptions &option, const string &command);
+int sandboxExec(int boxid, const sandboxOptions &, const string &);
 
 int sandboxDele(int boxid);
 

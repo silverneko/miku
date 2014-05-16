@@ -8,7 +8,7 @@
 #include<unistd.h>
 #include"server_io.h"
 
-int fetch_submission(submission &sub)
+int fetchSubmission(submission &sub)
 {
    FILE *Pipe = popen("fetch_submission.py", "r");
    fscanf(Pipe, "%d", &sub.submission_id);
@@ -31,7 +31,7 @@ int fetch_submission(submission &sub)
    return 0;
 }
 
-int download_testdata(submission &sub)
+int downloadTestdata(submission &sub)
 {
    ostringstream sout;
    sout << "./testdata/" << setfill('0') << setw(4) << sub.problem_id;
@@ -71,7 +71,7 @@ int download_testdata(submission &sub)
    return 0;
 }
 
-int fetch_problem(submission &sub)
+int fetchProblem(submission &sub)
 {
    //get memlimit, timelimit
    ostringstream sout;
@@ -90,7 +90,7 @@ int fetch_problem(submission &sub)
    }
 
    //download testdata
-   if(download_testdata(sub) == -1){
+   if(downloadTestdata(sub) == -1){
       return -1;
    }
 
@@ -101,13 +101,20 @@ int fetch_problem(submission &sub)
    return 0;
 }
 
-int send_result(submission &sub, int verdict)
+int sendResult(submission &sub, int verdict)
 {
-   for(int i = 0; i < sub.testdata_count; ++i)
-      verdict = max(verdict, sub.verdict[i]);
-
+   if(verdict != CE){
+      for(int i = 0; i < sub.testdata_count; ++i){
+         verdict = max(verdict, sub.verdict[i]);
+         cerr << "td" << i << " : time " << sub.time[i];
+         cerr << " mem " << sub.mem[i];
+         cerr << " verdict " << fromVerdict(sub.verdict[i]).toStr();
+         cerr << endl;
+      }
+   }
    ostringstream sout;
-   sout << "update_verdict.py " << sub.submission_id << ' ' << fromVerdict(verdict).to_str();
+   sout << "update_verdict.py" << ' ' << sub.submission_id << ' ';
+   sout << "'"<< fromVerdict(verdict).toStr() << "'";
    system(sout.str().c_str());
    return 0;
 }

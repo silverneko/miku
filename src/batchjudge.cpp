@@ -30,10 +30,14 @@ int main(int argc, char *argv[])
    //set options
    sandboxOptions opt;
       //opt.dirs.push_back("/tmp/box/10/box");
+   opt.cgroup = true;
+   opt.procs = 1;
    opt.input = "input";
    opt.output = "output";
    opt.errout = "/dev/null";
-   opt.meta = "./testzone/META";
+   sout.str("");
+   sout << judgeid - 20;
+   opt.meta = "./testzone/META" + sout.str();
    opt.timeout = time_limit;
    opt.mem = mem_limit;
    

@@ -1,6 +1,7 @@
 #ifndef UTILS
 #define UTILS
 
+#include<sstream>
 #include<string>
 
 using namespace std;
@@ -20,10 +21,11 @@ enum RESULTS{
 };
 
 class fromVerdict{
-	public:
 		const int verdict;
+	public:
+      explicit fromVerdict();
 		fromVerdict(int verdict) : verdict(verdict) {}
-		const char* to_str()
+		const char* toStr() const
 		{
 			switch(verdict){
 				case AC:
@@ -33,13 +35,14 @@ class fromVerdict{
 				case TLE:
 					return "Time Limit Exceeded";
 				case MLE:
-					return "Memory Limit Exceeded";
+					return "Segmentation Fault";
+					//return "Memory Limit Exceeded";
 				case OLE:
 					return "Output Limit Exceeded";
 				case RE:
-					return "Runtime Error";
+					return "Runtime Error (or Nonzero Return)";
 				case SIG:
-					return "Exited with Signal";
+					return "Exited On Signal";
 				case CE:
 					return "Compile Error";
 				case CO:
@@ -49,6 +52,20 @@ class fromVerdict{
 					return "Congradulations! You just panicked the judge.";
 			}
 		}
+};
+
+class cast{
+      const string val;
+   public:
+      explicit cast();
+      cast(const string& c) : val(c) {}
+      template<typename T> T to() const
+      {
+         T res;
+         istringstream in(val);
+         in >> res;
+         return res;
+      }
 };
 
 class submission{

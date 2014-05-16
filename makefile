@@ -31,10 +31,10 @@ all: | ./bin ./build ./bin/miku ./bin/isolate ./bin/batchjudge
 	mv ./isolate/isolate ./bin/isolate
 
 ./bin:
-	mkdir ./bin
+	mkdir -p ./bin
 
 ./build:
-	mkdir ./build
+	mkdir -p ./build
 
 clean:
 	rm -f -r ./build/*

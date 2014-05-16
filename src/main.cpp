@@ -53,19 +53,19 @@ int main(int argc, char *argv[])
 
    while(true){
       submission sub;
-      if(fetch_submission(sub) == -1){
+      if(fetchSubmission(sub) == -1){
          usleep(3000000);
          continue;
       }
       cerr << "Recieveed submission [" << sub.submission_id << "]" << endl;
-      if(fetch_problem(sub) == -1){
+      if(fetchProblem(sub) == -1){
          usleep(3000000);
          cerr << "[ERROR] Can't fetch problem" << endl;
          continue;
       }
       
       int verdict = testsuite(sub);
-      send_result(sub, verdict);
+      sendResult(sub, verdict);
    }
 
 
