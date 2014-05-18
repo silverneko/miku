@@ -26,7 +26,7 @@ all: | ./bin ./build ./bin/miku ./bin/isolate ./bin/batchjudge
 ./build/batchjudge.o: ./src/batchjudge.cpp ./src/sandbox.h
 	$(CC) -o ./build/batchjudge.o -c ./src/batchjudge.cpp $(CFLAGS)
 
-./bin/isolate:
+./bin/isolate: ./isolate/*
 	make -C ./isolate/
 	mv ./isolate/isolate ./bin/isolate
 
