@@ -11,7 +11,7 @@ using namespace std;
 int sandboxExec(int boxid, const sandboxOptions &opt, const string &comm)
 {
    ostringstream sout;
-   sout << "isolate --box-id=" << boxid;
+   sout << "isolate -v -v --box-id=" << boxid;
    if(opt.cgroup) sout << " --cg";
    if(opt.preserve_env) sout << " --full-env";
    for(int i = 0; i < opt.dirs.size(); ++i)
@@ -25,7 +25,7 @@ int sandboxExec(int boxid, const sandboxOptions &opt, const string &comm)
    double timeout = opt.timeout * 0.001;
    if(opt.timeout != 0){
       sout << " --time=" << fixed << setprecision(3) << timeout;
-      sout << " --wall-time=" << fixed << setprecision(3) << timeout * 3;
+      //sout << " --wall-time=" << fixed << setprecision(3) << timeout * 3;
    }
    sout << " --extra-time=0.2";
    sout << " --run -- " << comm;

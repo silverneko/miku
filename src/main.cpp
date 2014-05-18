@@ -46,11 +46,13 @@ int main(int argc, char *argv[])
       cerr << "Must be started as root !" << endl;
       return 0;
    }
+   /*
    if(access("./testdata", F_OK))
       system("mkdir ./testdata");
    if(access("./testzone", F_OK))
       system("mkdir ./testzone");
-
+   */
+   
    while(true){
       submission sub;
       if(fetchSubmission(sub) == -1){

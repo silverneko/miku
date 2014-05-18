@@ -188,8 +188,8 @@ int compile(int boxid, const submission& target)
    
    sout.str("");
    if(target.lang == "c++"){
-      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 -static ";
-      sout << " -std=" << target.std << " ";// << " 2>/dev/null ";
+      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2";
+      sout << " -std=" << target.std << " ";
    }
    string comm(sout.str());
    sandboxOptions opt;
