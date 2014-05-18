@@ -1,5 +1,5 @@
 CC = clang++
-CFLAGS =  -std=c++11 -static -Wall
+CFLAGS = -Wall -std=c++11
 SRC = ./src
 HEADERS = ./src/config.h ./src/utils.h
 
