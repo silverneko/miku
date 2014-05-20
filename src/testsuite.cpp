@@ -46,7 +46,7 @@ int testsuite(submission &sub)
          sandboxDele(20+td);
          --procnum;
       }
-      
+
       if(procnum < MAXPARNUM){
          const int judgeid = 20 + i;
          //batch judge
@@ -107,7 +107,7 @@ void getExitStatus(submission &sub, int td)
       in >> a >> b;
       META[a] = b;
    }
-   
+
    //mem_used
    sub.mem[td] = cast(META["cg-mem"]).to<int>();
    //time_used
@@ -131,20 +131,23 @@ void getExitStatus(submission &sub, int td)
       // "XX"
       sub.verdict[td] = ER;
    }
-   //return verdict;
+   return ;
 }
 
 void eval(submission &sub, int td)
 {
    int problem_id = sub.problem_id;
    getExitStatus(sub, td);
-   
+   if(sub.verdict[td] != OK){
+      return ;
+   }
+
    int status = AC;
-   string s,t;
+   string s, t;
    //solution output
    ostringstream sout;
    sout << "./testdata/" << setfill('0') << setw(4) << problem_id
-        << "/output" << setw(3) << td;
+      << "/output" << setw(3) << td;
    fstream tsol(sout.str());
    //user output
    sout.str("");
@@ -173,7 +176,8 @@ void eval(submission &sub, int td)
          break;
       }
    }
-   sub.verdict[td] = max(sub.verdict[td], status);
+   sub.verdict[td] = status;
+   return ;
 }
 
 int compile(int boxid, const submission& target)
@@ -181,11 +185,11 @@ int compile(int boxid, const submission& target)
    ostringstream sout;
    sout << "/tmp/box/" << boxid << "/box/";
    string boxdir(sout.str());
-   
+
    ofstream fout(boxdir + "main.cpp");
    fout << target.source << flush;
    fout.close();
-   
+
    sout.str("");
    if(target.lang == "c++"){
       sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2";
@@ -199,11 +203,11 @@ int compile(int boxid, const submission& target)
    opt.errout = "compile_error";
    opt.timeout = 60 * 1000;
    opt.meta = "./testzone/metacomp";
-   
+
    sandboxExec(boxid, opt, comm);
    if(access((boxdir+"main.out").c_str(), F_OK) == -1){
       return CE;
    }
-   
+
    return OK;
 }

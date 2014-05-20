@@ -40,7 +40,7 @@ class fromVerdict{
 				case OLE:
 					return "Output Limit Exceeded";
 				case RE:
-					return "Runtime Error (or Nonzero Return)";
+					return "Runtime Error (exited with nonzero status)";
 				case SIG:
 					return "Exited On Signal";
 				case CE:
