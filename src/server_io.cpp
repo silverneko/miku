@@ -18,12 +18,12 @@ int fetchSubmission(submission &sub)
    }
    fscanf(Pipe, "%d", &sub.problem_id);
    //fscanf(Pipe, "%d", &sub.submitter_id);
-   char *buff = new char[5000000];
+   char *buff = new char[5*1024*1024];
    fscanf(Pipe, "%s", buff);
    sub.lang = buff;
    sub.std = "c++11";
    ostringstream sout;
-   while(fgets(buff, 5000000, Pipe) != NULL)
+   while(fgets(buff, 5*1024*1024, Pipe) != NULL)
       sout << buff;
    sub.source = sout.str();
    pclose(Pipe);

@@ -2,5 +2,5 @@
 
 mkdir -p ./testdata
 mkdir -p ./testzone
-export PATH=$PATH:./apps:./bin
+export PATH=$PATH:./app:./bin
 miku --verbose
