@@ -20,8 +20,20 @@ int fetchSubmission(submission &sub)
    //fscanf(Pipe, "%d", &sub.submitter_id);
    char *buff = new char[5*1024*1024];
    fscanf(Pipe, "%s", buff);
-   sub.lang = buff;
-   sub.std = "c++11";
+   if(buff == "c++11"){
+      sub.lang = "c++";
+      sub.std = "c++11";
+   }else if(buff == "c++"){
+      sub.lang = "c++";
+      sub.std = "";
+   }else if(buff == "c"){
+      sub.lang = "c";
+      sub.std = "";
+   }else{
+      sub.lang = "c++";
+      sub.std = "c++11";
+   }
+   
    ostringstream sout;
    while(fgets(buff, 5*1024*1024, Pipe) != NULL)
       sout << buff;

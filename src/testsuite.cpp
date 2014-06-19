@@ -192,8 +192,12 @@ int compile(int boxid, const submission& target)
 
    sout.str("");
    if(target.lang == "c++"){
-      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2";
-      sout << " -std=" << target.std << " ";
+      sout << "/usr/bin/clang++ ./main.cpp -o ./main.out -O2 ";
+   }else{
+      sout << "/usr/bin/clang ./main.cpp -o ./main.out -O2 ";
+   }
+   if(!target.std.empty()){
+      sout << "-std=" << target.std << " ";
    }
    string comm(sout.str());
    sandboxOptions opt;
