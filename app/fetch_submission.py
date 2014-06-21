@@ -1,5 +1,13 @@
 #!/usr/bin/python2
 
+import urllib2
+
+respond = urllib2.urlopen("http://0.0.0.0:3000/fetch/submission?key=31415926")
+print respond.read()
+quit()
+
+##########################################
+
 import MySQLdb
 
 db = MySQLdb.connect("localhost", "root", "iloveinfor", "tioj_dev");
@@ -15,7 +23,7 @@ if data == None :
 else :
    print data['id']
    print data['problem_id']
-   #print data['user_id']
+   print data['user_id']
    print data['compiler']
    print data['code']
 

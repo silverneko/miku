@@ -24,7 +24,7 @@ class fromVerdict{
 		const int verdict;
 	public:
       explicit fromVerdict();
-		fromVerdict(int verdict) : verdict(verdict) {}
+		explicit fromVerdict(int verdict) : verdict(verdict) {}
 		const char* toStr() const
 		{
 			switch(verdict){
@@ -36,20 +36,45 @@ class fromVerdict{
 					return "Time Limit Exceeded";
 				case MLE:
 					return "Segmentation Fault";
-					//return "Memory Limit Exceeded";
 				case OLE:
 					return "Output Limit Exceeded";
 				case RE:
 					return "Runtime Error (exited with nonzero status)";
 				case SIG:
-					return "Exited On Signal";
+					return "Runtime Error (exited with signal)";
 				case CE:
 					return "Compile Error";
 				case CO:
-					return "Compiling Timed Out";
+					return "Compilation Timed Out";
 				case ER:
 				default:
-					return "Congradulations! You just panicked the judge.";
+					return "WTF!";
+			}
+		}
+		const char* toAbr() const
+		{
+			switch(verdict){
+				case AC:
+					return "AC";
+				case WA:
+					return "WA";
+				case TLE:
+					return "TLE";
+				case MLE:
+					return "MLE";
+				case OLE:
+					return "OLE";
+				case RE:
+					return "RE";
+				case SIG:
+					return "SIG";
+				case CE:
+					return "CE";
+				case CO:
+					return "CO";
+				case ER:
+				default:
+					return "ER";
 			}
 		}
 };
@@ -81,10 +106,10 @@ class submission{
       //problem
       int problem_type;
       string special_judge;
-      int mem_limit;
-      int time_limit;
-      int testdata_count;
       //test result
+      int testdata_count;
+      int mem_limit[200];
+      int time_limit[200];
       int verdict[200];
       double score[200];
       int mem[200], time[200];
@@ -101,8 +126,6 @@ class submission{
 
          problem_type = 0;
          special_judge = "";
-         mem_limit = 0;
-         time_limit = 0;
          testdata_count = 0;
       }
 };

@@ -29,8 +29,8 @@ int testsuite(submission &sub)
    map<pid_t, int> proc;
    int procnum = 0;
    int problem_id = sub.problem_id;
-   int time_limit = sub.time_limit;
-   int mem_limit = sub.mem_limit;
+   int* time_limit = sub.time_limit;
+   int* mem_limit = sub.mem_limit;
 
    for(int i = 0; i < sub.testdata_count; ++i){
       while(procnum >= MAXPARNUM){
@@ -53,8 +53,8 @@ int testsuite(submission &sub)
          ostringstream command;
          command << "batchjudge " << problem_id;
          command << " " << judgeid;
-         command << " " << time_limit;
-         command << " " << mem_limit;
+         command << " " << time_limit[i];
+         command << " " << mem_limit[i];
          //
          pid_t pid = fork();
          if(pid == -1){
@@ -192,9 +192,9 @@ int compile(int boxid, const submission& target)
 
    sout.str("");
    if(target.lang == "c++"){
-      sout << "/usr/bin/clang++ ./main.cpp -o ./main.out -O2 ";
+      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 ";
    }else{
-      sout << "/usr/bin/clang ./main.cpp -o ./main.out -O2 ";
+      sout << "/usr/bin/gcc ./main.cpp -o ./main.out -O2 ";
    }
    if(!target.std.empty()){
       sout << "-std=" << target.std << " ";

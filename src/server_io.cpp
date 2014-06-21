@@ -17,16 +17,16 @@ int fetchSubmission(submission &sub)
       return -1;
    }
    fscanf(Pipe, "%d", &sub.problem_id);
-   //fscanf(Pipe, "%d", &sub.submitter_id);
+   fscanf(Pipe, "%d", &sub.submitter_id);
    char *buff = new char[5*1024*1024];
    fscanf(Pipe, "%s", buff);
-   if(buff == "c++11"){
+   if((string)buff == "c++11"){
       sub.lang = "c++";
       sub.std = "c++11";
-   }else if(buff == "c++"){
+   }else if((string)buff == "c++"){
       sub.lang = "c++";
       sub.std = "";
-   }else if(buff == "c"){
+   }else if((string)buff == "c"){
       sub.lang = "c";
       sub.std = "";
    }else{
@@ -85,15 +85,8 @@ int downloadTestdata(submission &sub)
 
 int fetchProblem(submission &sub)
 {
-   //get memlimit, timelimit
-   ostringstream sout;
-   sout << "fetch_limits.py " << sub.problem_id;
-   FILE *Pipe = popen(sout.str().c_str(), "r");
-   fscanf(Pipe, "%d %d", &sub.time_limit, &sub.mem_limit);
-   pclose(Pipe);
-
    //check if testdata dir exists
-   sout.str("");
+   ostringstream sout;
    sout << "./testdata/";
    sout << setfill('0') << setw(4) << sub.problem_id;
    string testdata_dir(sout.str());
@@ -105,8 +98,18 @@ int fetchProblem(submission &sub)
    if(downloadTestdata(sub) == -1){
       return -1;
    }
+   
+   //get memlimit, timelimit
+   sout.str("");
+   sout << "fetch_limits.py " << sub.problem_id;
+   FILE *Pipe = popen(sout.str().c_str(), "r");
+   for(int i = 0; i < sub.testdata_count; ++i){
+      fscanf(Pipe, "%d %d", &sub.time_limit[i], &sub.mem_limit[i]);
+   }
+   pclose(Pipe);
 
-   //Batch judge only, haven't done anything for `special`
+
+   //Only have Batch judge now, haven't done anything for `special`
    //`interactive`, `output only` yet
 
 
@@ -115,6 +118,25 @@ int fetchProblem(submission &sub)
 
 int sendResult(submission &sub, int verdict)
 {
+   ostringstream sout;
+   sout << "update_verdict.py " << sub.submission_id << ' ';
+   if(verdict == CE){
+      sout << "CE";
+   }else{
+      for(int i = 0; i < sub.testdata_count; ++i){
+         sout << fromVerdict(sub.verdict[i]).toAbr() << '/';
+         sout << sub.time[i] << '/';
+         sout << sub.mem[i] << '/';
+         
+         cerr << "td" << i << " : time " << sub.time[i];
+         cerr << " mem " << sub.mem[i];
+         cerr << " verdict " << fromVerdict(sub.verdict[i]).toStr();
+         cerr << endl;
+      }
+   }
+   system(sout.str().c_str());
+   return 0;
+   /*
    if(verdict != CE){
       for(int i = 0; i < sub.testdata_count; ++i){
          verdict = max(verdict, sub.verdict[i]);
@@ -126,8 +148,10 @@ int sendResult(submission &sub, int verdict)
    }
    ostringstream sout;
    sout << "update_verdict.py" << ' ' << sub.submission_id << ' ';
-   sout << "'"<< fromVerdict(verdict).toStr() << "'";
+   //sout << "'"<< fromVerdict(verdict).toStr() << "'";
+   sout << "'"<< fromVerdict(verdict).toAbr() << "'";
    system(sout.str().c_str());
    return 0;
+   */
 }
 
