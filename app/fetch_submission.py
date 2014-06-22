@@ -2,8 +2,13 @@
 
 import urllib2
 
-respond = urllib2.urlopen("http://0.0.0.0:3000/fetch/submission?key=31415926")
-print respond.read()
+try:
+  respond = urllib2.urlopen("http://0.0.0.0:3000/fetch/submission?key=31415926")
+  print respond.read()
+
+except urllib2.URLError, e:
+  print -2, e.reason
+
 quit()
 
 ##########################################

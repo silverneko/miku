@@ -23,13 +23,18 @@ int main(int argc, char *argv[])
          if(option[0] == '-'){
             if(option == "-verbose"){
                verbose = true;
-            }else{
-            
+            }else if(option == "-parallel"){
+               MAXPARNUM = cast(argv[i+1]).to<int>();
+               ++i;
             }
          }else{
             switch(option[0]){
                case 'v':
                   verbose = true;
+                  break;
+               case 'p':
+                  MAXPARNUM = cast(argv[i+1]).to<int>();
+                  ++i;
                   break;
             }
          }
@@ -55,14 +60,18 @@ int main(int argc, char *argv[])
    
    while(true){
       submission sub;
-      if(fetchSubmission(sub) == -1){
+      int status = fetchSubmission(sub);
+      if(status != 0){
+         if(status == -2){
+            cerr << "[ERROR] Unable to connect to TIOJ url" << endl; 
+         }
          usleep(3000000);
          continue;
       }
-      cerr << "Recieveed submission [" << sub.submission_id << "]" << endl;
+      cerr << "Recieved submission [" << sub.submission_id << "]" << endl;
       if(fetchProblem(sub) == -1){
          usleep(3000000);
-         cerr << "[ERROR] Can't fetch problem" << endl;
+         cerr << "[ERROR] Unable to fetch problem meta" << endl;
          continue;
       }
       

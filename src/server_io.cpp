@@ -12,9 +12,9 @@ int fetchSubmission(submission &sub)
 {
    FILE *Pipe = popen("fetch_submission.py", "r");
    fscanf(Pipe, "%d", &sub.submission_id);
-   if(sub.submission_id == -1){
+   if(sub.submission_id < 0){
       pclose(Pipe);
-      return -1;
+      return sub.submission_id;
    }
    fscanf(Pipe, "%d", &sub.problem_id);
    fscanf(Pipe, "%d", &sub.submitter_id);
