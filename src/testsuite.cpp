@@ -15,14 +15,14 @@
 using namespace std;
 
 int compile(int boxid, const submission& target);
-void eval(submission &sub, int td);
+void eval(submission &sub, int td, int);
 void getExitStatus(submission &sub, int td);
 
-int testsuite(submission &sub)
+int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
 {
    system("rm -f ./testzone/*");
-   sandboxInit(10);
-   int status = compile(10, sub);
+   sandboxInit(BOXOFFSET + 0);
+   int status = compile(BOXOFFSET + 0, sub);
    if(status != OK) return status;
 
    //anyway, only have batch judge right now
@@ -41,20 +41,21 @@ int testsuite(submission &sub)
             return ER;
          }
          const int td = proc[cid];
-         eval(sub, td);
+         eval(sub, td, BOXOFFSET);
          //cerr << "td" << td << " : " << sub.verdict[td] << endl;
-         sandboxDele(20+td);
+         sandboxDele(BOXOFFSET + 1+td);
          --procnum;
       }
 
       if(procnum < MAXPARNUM){
-         const int judgeid = 20 + i;
          //batch judge
          ostringstream command;
          command << "batchjudge " << problem_id;
-         command << " " << judgeid;
+         command << " " << i;
+         command << " " << BOXOFFSET + 1 + i;
          command << " " << time_limit[i];
          command << " " << mem_limit[i];
+         command << " " << BOXOFFSET + 0;
          //
          pid_t pid = fork();
          if(pid == -1){
@@ -80,18 +81,18 @@ int testsuite(submission &sub)
       }
       const int td = proc[cid];
       //sub.verdict[td] = eval(problem_id, td);
-      eval(sub, td);
+      eval(sub, td, BOXOFFSET);
       //cerr << "td" << td << " : " << sub.verdict[td] << endl;
-      sandboxDele(20+td);
+      sandboxDele(BOXOFFSET + 1 + td);
       --procnum;
    }
    //clear box-10
-   sandboxDele(10);
+   sandboxDele(BOXOFFSET + 0);
 
    return OK;
 }
 
-void getExitStatus(submission &sub, int td)
+void setExitStatus(submission &sub, int td)
 {
    ostringstream sout;
    sout << "./testzone/META" << td;
@@ -134,10 +135,10 @@ void getExitStatus(submission &sub, int td)
    return ;
 }
 
-void eval(submission &sub, int td)
+void eval(submission &sub, int td, int BOXOFFSET)
 {
    int problem_id = sub.problem_id;
-   getExitStatus(sub, td);
+   setExitStatus(sub, td);
    if(sub.verdict[td] != OK){
       return ;
    }
@@ -151,7 +152,7 @@ void eval(submission &sub, int td)
    fstream tsol(sout.str());
    //user output
    sout.str("");
-   sout << "/tmp/box/" << 20 + td << "/box/output";
+   sout << "/tmp/box/" << BOXOFFSET + 1 + td << "/box/output";
    fstream mout(sout.str());
    while(1){
       s="";

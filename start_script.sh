@@ -3,4 +3,4 @@
 mkdir -p ./testdata
 mkdir -p ./testzone
 export PATH=$PATH:./app:./bin
-miku --verbose --parallel 4
+miku --verbose --parallel 1 -b 10

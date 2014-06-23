@@ -10,6 +10,8 @@ int downloadTestdata(submission &);
 
 int fetchProblem(submission &);
 
-int sendResult(submission &, int verdict);
+int sendResult(submission &, int verdict, bool done);
+
+int respondValidating(int);
 
 #endif

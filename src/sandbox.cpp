@@ -11,7 +11,7 @@ using namespace std;
 int sandboxExec(int boxid, const sandboxOptions &opt, const string &comm)
 {
    ostringstream sout;
-   sout << "isolate -v -v --box-id=" << boxid;
+   sout << "isolate --box-id=" << boxid;
    if(opt.cgroup) sout << " --cg";
    if(opt.preserve_env) sout << " --full-env";
    for(int i = 0; i < opt.dirs.size(); ++i)
@@ -31,7 +31,7 @@ int sandboxExec(int boxid, const sandboxOptions &opt, const string &comm)
    sout << " --run -- " << comm;
    system(sout.str().c_str());
    
-   cerr << "[debug] sandbox" << boxid << " executed command : " << sout.str() << endl;
+   cerr << "[debug] box-" << boxid << " executed command : " << sout.str() << endl;
    return 0;
 }
 

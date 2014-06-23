@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
 {
    //initialize
    bool verbose = false;
+   int MAXPARNUM = 1, BOXOFFSET = 10;
    for(int i = 1; i < argc; ++i){
       if(argv[i][0] == '-'){
          string option(argv[i]+1);
@@ -25,6 +26,9 @@ int main(int argc, char *argv[])
                verbose = true;
             }else if(option == "-parallel"){
                MAXPARNUM = cast(argv[i+1]).to<int>();
+               ++i;
+            }else if(option == "-boxoffset"){
+               BOXOFFSET = cast(argv[i+1]).to<int>();
                ++i;
             }
          }else{
@@ -36,6 +40,11 @@ int main(int argc, char *argv[])
                   MAXPARNUM = cast(argv[i+1]).to<int>();
                   ++i;
                   break;
+               case 'b':
+                  BOXOFFSET = cast(argv[i+1]).to<int>();
+                  ++i;
+                  break;
+               
             }
          }
       }
@@ -69,14 +78,15 @@ int main(int argc, char *argv[])
          continue;
       }
       cerr << "Recieved submission [" << sub.submission_id << "]" << endl;
+      respondValidating(sub.submission_id);
       if(fetchProblem(sub) == -1){
          usleep(3000000);
          cerr << "[ERROR] Unable to fetch problem meta" << endl;
          continue;
       }
       
-      int verdict = testsuite(sub);
-      sendResult(sub, verdict);
+      int verdict = testsuite(sub, MAXPARNUM, BOXOFFSET);
+      sendResult(sub, verdict, true);
    }
 
 

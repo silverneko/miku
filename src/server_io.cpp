@@ -8,6 +8,14 @@
 #include<unistd.h>
 #include"server_io.h"
 
+int respondValidating(int submission_id)
+{
+   ostringstream sout;
+   sout << "respond_validating.py " << submission_id;
+   system(sout.str().c_str());
+   return 0;
+}
+
 int fetchSubmission(submission &sub)
 {
    FILE *Pipe = popen("fetch_submission.py", "r");
@@ -116,7 +124,7 @@ int fetchProblem(submission &sub)
    return 0;
 }
 
-int sendResult(submission &sub, int verdict)
+int sendResult(submission &sub, int verdict, bool done)
 {
    ostringstream sout;
    sout << "update_verdict.py " << sub.submission_id << ' ';
@@ -133,6 +141,11 @@ int sendResult(submission &sub, int verdict)
          cerr << " verdict " << fromVerdict(sub.verdict[i]).toStr();
          cerr << endl;
       }
+   }
+   if(done){
+      sout << " OK";
+   }else{
+      sout << " NO";
    }
    system(sout.str().c_str());
    return 0;
