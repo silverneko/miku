@@ -98,7 +98,8 @@ class submission{
       //meta
       int problem_id;
       int submission_id;
-      string source;
+      string code;
+      string sjcode;
       string lang;
       string std;
       string submitter;
@@ -118,7 +119,8 @@ class submission{
       {
          problem_id = 0;
          submission_id = 0;
-         source = "";
+         code = "";
+         sjcode = "";
          lang = "";
          std = "";
          submitter = "";

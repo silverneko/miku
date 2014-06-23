@@ -25,6 +25,7 @@ int fetchSubmission(submission &sub)
       return sub.submission_id;
    }
    fscanf(Pipe, "%d", &sub.problem_id);
+   fscanf(Pipe, "%d", &sub.problem_type);
    fscanf(Pipe, "%d", &sub.submitter_id);
    char *buff = new char[5*1024*1024];
    fscanf(Pipe, "%s", buff);
@@ -45,7 +46,7 @@ int fetchSubmission(submission &sub)
    ostringstream sout;
    while(fgets(buff, 5*1024*1024, Pipe) != NULL)
       sout << buff;
-   sub.source = sout.str();
+   sub.code = sout.str();
    pclose(Pipe);
    delete [] buff;
    return 0;
@@ -130,6 +131,8 @@ int sendResult(submission &sub, int verdict, bool done)
    sout << "update_verdict.py " << sub.submission_id << ' ';
    if(verdict == CE){
       sout << "CE";
+   }else if( verdict == ER){
+      sout << "ER";
    }else{
       for(int i = 0; i < sub.testdata_count; ++i){
          sout << fromVerdict(sub.verdict[i]).toAbr() << '/';

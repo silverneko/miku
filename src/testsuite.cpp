@@ -14,17 +14,19 @@
 
 using namespace std;
 
-int compile(int boxid, const submission& target);
-void eval(submission &sub, int td, int);
+int compile(const submission& target, int boxid, int spBoxid);
+void eval(submission &sub, int td, int boxid, int spBoxid);
 void getExitStatus(submission &sub, int td);
 
 int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
 {
    system("rm -f ./testzone/*");
-   sandboxInit(BOXOFFSET + 0);
-   int status = compile(BOXOFFSET + 0, sub);
+   const int testBoxid = BOXOFFSET + 0, spBoxid = BOXOFFSET + 1;
+   sandboxInit(testBoxid);
+   sandboxInit(spBoxid);
+   int status = compile(sub, testBoxid, spBoxid);
    if(status != OK) return status;
-
+   
    //anyway, only have batch judge right now
    map<pid_t, int> proc;
    int procnum = 0;
@@ -40,10 +42,10 @@ int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
             perror("[ERROR] in testsuite,  `waitpid()` failed :");
             return ER;
          }
-         const int td = proc[cid];
-         eval(sub, td, BOXOFFSET);
+         int td = proc[cid];
+         eval(sub, td, BOXOFFSET + 10 + td, spBoxid);
          //cerr << "td" << td << " : " << sub.verdict[td] << endl;
-         sandboxDele(BOXOFFSET + 1+td);
+         sandboxDele(BOXOFFSET + 10 + td);
          --procnum;
       }
 
@@ -52,15 +54,15 @@ int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
          ostringstream command;
          command << "batchjudge " << problem_id;
          command << " " << i;
-         command << " " << BOXOFFSET + 1 + i;
+         command << " " << BOXOFFSET + 10 + i;
          command << " " << time_limit[i];
          command << " " << mem_limit[i];
-         command << " " << BOXOFFSET + 0;
+         command << " " << testBoxid;
          //
          pid_t pid = fork();
          if(pid == -1){
             perror("[ERROR] in testsuite, `fork()` failed :");
-            return -1;
+            return ER;
          }
          if(pid == 0){
             //child proc
@@ -81,14 +83,14 @@ int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
       }
       const int td = proc[cid];
       //sub.verdict[td] = eval(problem_id, td);
-      eval(sub, td, BOXOFFSET);
+      eval(sub, td, BOXOFFSET + 10 + td, spBoxid);
       //cerr << "td" << td << " : " << sub.verdict[td] << endl;
-      sandboxDele(BOXOFFSET + 1 + td);
+      sandboxDele(BOXOFFSET + 10 + td);
       --procnum;
    }
    //clear box-10
-   sandboxDele(BOXOFFSET + 0);
-
+   sandboxDele(testBoxid);
+   sandboxDele(spBoxid);
    return OK;
 }
 
@@ -135,11 +137,34 @@ void setExitStatus(submission &sub, int td)
    return ;
 }
 
-void eval(submission &sub, int td, int BOXOFFSET)
+void eval(submission &sub, int td, int boxid, int spBoxid)
 {
    int problem_id = sub.problem_id;
    setExitStatus(sub, td);
    if(sub.verdict[td] != OK){
+      return ;
+   }
+   
+   if(sub.problem_type == 1){
+      ostringstream sout;
+      sout << "/tmp/box/" << spBoxid << "/box/sj.out ";
+      string sjpath(sout.str());
+      sout.str("");
+      sout << "./testdata" << setfill('0') << setw(4) << problem_id << "/input" << setw(3) << td << ' ';
+      string tdin(sout.str());
+      sout.str("");
+      sout << "./testdata" << setfill('0') << setw(4) << problem_id << "/output" << setw(3) << td << ' ';
+      string tdout(sout.str());
+      sout.str("");
+      sout << "/tmp/box/" << boxid << "/box/output";
+      string ttout(sout.str());
+      FILE* Pipe = popen((sjpath+tdin+tdout+ttout).c_str(), "r");
+      int result;
+      fscanf(Pipe, "%d", &result);
+      if(result == 0)
+         sub.verdict[td] = WA;
+      else
+         sub.verdict[td] = AC;
       return ;
    }
 
@@ -152,7 +177,7 @@ void eval(submission &sub, int td, int BOXOFFSET)
    fstream tsol(sout.str());
    //user output
    sout.str("");
-   sout << "/tmp/box/" << BOXOFFSET + 1 + td << "/box/output";
+   sout << "/tmp/box/" << boxid << "/box/output";
    fstream mout(sout.str());
    while(1){
       s="";
@@ -181,14 +206,14 @@ void eval(submission &sub, int td, int BOXOFFSET)
    return ;
 }
 
-int compile(int boxid, const submission& target)
+int compile(const submission& target, int boxid, int spBoxid)
 {
    ostringstream sout;
    sout << "/tmp/box/" << boxid << "/box/";
    string boxdir(sout.str());
 
    ofstream fout(boxdir + "main.cpp");
-   fout << target.source << flush;
+   fout << target.code << flush;
    fout.close();
 
    sout.str("");
@@ -213,6 +238,26 @@ int compile(int boxid, const submission& target)
    if(access((boxdir+"main.out").c_str(), F_OK) == -1){
       return CE;
    }
+   
+   if(target.problem_type == 1){
+      sout.str("");
+      sout << "/tmp/box/" << spBoxid << "/box/";
+      string spBoxdir = sout.str();
+      
+      fout.open(spBoxdir + "sj.cpp");
+      fout << target.sjcode << flush;
+      fout.close();
+      
+      sout.str("");
+      sout << "/usr/bin/g++ ./sj.cpp -o ./sj.out -O2 -std=c++11 ";
+      
+      opt.meta = "./testzone/metacompsj";
 
+      sandboxExec(spBoxid, opt, comm);
+      if(access((spBoxdir+"sj.out").c_str(), F_OK) == -1){
+         return ER;
+      }
+   }
+   
    return OK;
 }

@@ -12,6 +12,7 @@ except urllib2.URLError, e:
 """
    print data['id']
    print data['problem_id']
+   print data['problem_type']
    print data['user_id']
    print data['compiler']
    print data['code']
