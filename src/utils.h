@@ -100,6 +100,7 @@ class submission{
       int submission_id;
       string code;
       string sjcode;
+      string interlib;
       string lang;
       string std;
       string submitter;
@@ -121,6 +122,7 @@ class submission{
          submission_id = 0;
          code = "";
          sjcode = "";
+         interlib = "";
          lang = "";
          std = "";
          submitter = "";

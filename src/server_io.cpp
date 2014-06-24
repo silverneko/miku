@@ -27,28 +27,22 @@ int fetchSubmission(submission &sub)
    fscanf(Pipe, "%d", &sub.problem_id);
    fscanf(Pipe, "%d", &sub.problem_type);
    fscanf(Pipe, "%d", &sub.submitter_id);
-   char *buff = new char[5*1024*1024];
+   char buff[30];
    fscanf(Pipe, "%s", buff);
-   if((string)buff == "c++11"){
+   pclose(Pipe);
+   if(string(buff) == "c++11"){
       sub.lang = "c++";
       sub.std = "c++11";
-   }else if((string)buff == "c++"){
+   }else if(string(buff) == "c++"){
       sub.lang = "c++";
       sub.std = "";
-   }else if((string)buff == "c"){
+   }else if(string(buff) == "c"){
       sub.lang = "c";
       sub.std = "";
    }else{
       sub.lang = "c++";
       sub.std = "c++11";
    }
-   
-   ostringstream sout;
-   while(fgets(buff, 5*1024*1024, Pipe) != NULL)
-      sout << buff;
-   sub.code = sout.str();
-   pclose(Pipe);
-   delete [] buff;
    return 0;
 }
 
@@ -94,8 +88,40 @@ int downloadTestdata(submission &sub)
 
 int fetchProblem(submission &sub)
 {
-   //check if testdata dir exists
+   //get submission code
+   char *buff = new char[5*1024*1024];
    ostringstream sout;
+   sout << "fetch_code.py " << sub.submission_id;
+   FILE* Pipe = popen(sout.str().c_str(), "r");
+   sout.str("");
+   while(fgets(buff, 5*1024*1024, Pipe) != NULL)
+      sout << buff;
+   sub.code = sout.str();
+   pclose(Pipe);
+   
+   //get sjcode
+   sout.str("");
+   sout << "fetch_sjcode.py " << sub.problem_id;
+   Pipe = popen(sout.str().c_str(), "r");
+   sout.str("");
+   while(fgets(buff, 5*1024*1024, Pipe) != NULL)
+      sout << buff;
+   sub.sjcode = sout.str();
+   pclose(Pipe);
+   
+   //get interlib
+   sout.str("");
+   sout << "fetch_interlib.py " << sub.problem_id;
+   Pipe = popen(sout.str().c_str(), "r");
+   sout.str("");
+   while(fgets(buff, 5*1024*1024, Pipe) != NULL)
+      sout << buff;
+   sub.interlib = sout.str();
+   pclose(Pipe);
+   
+   delete [] buff;
+   //check if testdata dir exists
+   sout.str("");
    sout << "./testdata/";
    sout << setfill('0') << setw(4) << sub.problem_id;
    string testdata_dir(sout.str());
@@ -111,7 +137,7 @@ int fetchProblem(submission &sub)
    //get memlimit, timelimit
    sout.str("");
    sout << "fetch_limits.py " << sub.problem_id;
-   FILE *Pipe = popen(sout.str().c_str(), "r");
+   Pipe = popen(sout.str().c_str(), "r");
    for(int i = 0; i < sub.testdata_count; ++i){
       fscanf(Pipe, "%d %d", &sub.time_limit[i], &sub.mem_limit[i]);
    }
@@ -131,7 +157,7 @@ int sendResult(submission &sub, int verdict, bool done)
    sout << "update_verdict.py " << sub.submission_id << ' ';
    if(verdict == CE){
       sout << "CE";
-   }else if( verdict == ER){
+   }else if(verdict == ER){
       sout << "ER";
    }else{
       for(int i = 0; i < sub.testdata_count; ++i){

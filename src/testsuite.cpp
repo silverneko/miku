@@ -156,11 +156,12 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       sout << "./testdata" << setfill('0') << setw(4) << problem_id << "/output" << setw(3) << td << ' ';
       string tdout(sout.str());
       sout.str("");
-      sout << "/tmp/box/" << boxid << "/box/output";
+      sout << "/tmp/box/" << boxid << "/box/output ";
       string ttout(sout.str());
-      FILE* Pipe = popen((sjpath+tdin+tdout+ttout).c_str(), "r");
-      int result;
+      FILE* Pipe = popen((sjpath+ttout+tdin+tdout).c_str(), "r");
+      int result = 0;
       fscanf(Pipe, "%d", &result);
+      pclose(Pipe);
       if(result == 0)
          sub.verdict[td] = WA;
       else
@@ -215,6 +216,14 @@ int compile(const submission& target, int boxid, int spBoxid)
    ofstream fout(boxdir + "main.cpp");
    fout << target.code << flush;
    fout.close();
+   
+   if(target.problem_type == 2){
+      sout.str("");
+      sout << boxdir << "lib" << setw(4) << setfill('0') << target.problem_id << ".h";
+      fout.open(sout.str());
+      fout << target.interlib << flush;
+      fout.close();
+   }
 
    sout.str("");
    if(target.lang == "c++"){
@@ -253,7 +262,7 @@ int compile(const submission& target, int boxid, int spBoxid)
       
       opt.meta = "./testzone/metacompsj";
 
-      sandboxExec(spBoxid, opt, comm);
+      sandboxExec(spBoxid, opt, sout.str());
       if(access((spBoxdir+"sj.out").c_str(), F_OK) == -1){
          return ER;
       }
