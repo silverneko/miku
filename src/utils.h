@@ -47,8 +47,9 @@ class fromVerdict{
 				case CO:
 					return "Compilation Timed Out";
 				case ER:
-				default:
 					return "WTF!";
+                                default:
+                                        return "nil";
 			}
 		}
 		const char* toAbr() const
@@ -73,8 +74,9 @@ class fromVerdict{
 				case CO:
 					return "CO";
 				case ER:
-				default:
 					return "ER";
+                                default:
+                                        return "";
 			}
 		}
 };
@@ -113,7 +115,6 @@ class submission{
       int mem_limit[200];
       int time_limit[200];
       int verdict[200];
-      double score[200];
       int mem[200], time[200];
       
       submission()
@@ -127,10 +128,14 @@ class submission{
          std = "";
          submitter = "";
          submitter_id = 0;
-
          problem_type = 0;
          special_judge = "";
          testdata_count = 0;
+         fill(mem_limit, mem_limit + 200, 0);
+         fill(time_limit, time_limit + 200, 0);
+         fill(verdict, verdict + 200, 0);
+         fill(mem, mem + 200, 0);
+         fill(time, time + 200, 0);
       }
 };
 

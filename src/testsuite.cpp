@@ -11,6 +11,7 @@
 #include"sandbox.h"
 #include"config.h"
 #include"testsuite.h"
+#include"server_io.h"
 
 using namespace std;
 
@@ -44,6 +45,7 @@ int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
          }
          int td = proc[cid];
          eval(sub, td, BOXOFFSET + 10 + td, spBoxid);
+         sendResult(sub, OK, false);
          //cerr << "td" << td << " : " << sub.verdict[td] << endl;
          sandboxDele(BOXOFFSET + 10 + td);
          --procnum;
@@ -84,6 +86,7 @@ int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
       const int td = proc[cid];
       //sub.verdict[td] = eval(problem_id, td);
       eval(sub, td, BOXOFFSET + 10 + td, spBoxid);
+      sendResult(sub, OK, false);
       //cerr << "td" << td << " : " << sub.verdict[td] << endl;
       sandboxDele(BOXOFFSET + 10 + td);
       --procnum;
