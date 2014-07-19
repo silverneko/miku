@@ -2,9 +2,10 @@
 
 import sys
 import urllib2
+from tioj_url import tioj_url
 
 submission_id = sys.argv[1]
 
-respond = urllib2.urlopen("http://0.0.0.0:3000/fetch/code?key=31415926&sid=" + submission_id)
+respond = urllib2.urlopen(tioj_url+"fetch/code?key=31415926&sid=" + submission_id)
 print respond.read()
 
