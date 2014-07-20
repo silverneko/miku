@@ -3,3 +3,4 @@ testdata/
 testzone/
 bin/
 build/
+app/tioj_url.*
