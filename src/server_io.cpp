@@ -172,9 +172,9 @@ int sendResult(submission &sub, int verdict, bool done)
       }
    }
    if(done){
-      sout << " OK";
+      sout << " OK OK";
    }else{
-      sout << " NO";
+      sout << " NO NO";
    }
    system(sout.str().c_str());
    return 0;
