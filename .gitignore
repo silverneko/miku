@@ -3,4 +3,5 @@ testdata/
 testzone/
 bin/
 build/
-app/tioj_url.*
+app/tioj_url.py
+app/tioj_url.pyc
