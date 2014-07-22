@@ -4,7 +4,7 @@ import urllib2
 from tioj_url import tioj_url, tioj_key
 
 try:
-  respond = urllib2.urlopen(tioj_url+"fetch/submission?key="+tioj_key)
+  respond = urllib2.urlopen(tioj_url+"/fetch/submission?key="+tioj_key)
   print respond.read()
 
 except urllib2.URLError, e:
