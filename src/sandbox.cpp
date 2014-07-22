@@ -25,7 +25,7 @@ int sandboxExec(int boxid, const sandboxOptions &opt, const string &comm)
    double timeout = opt.timeout * 0.001;
    if(opt.timeout != 0){
       sout << " --time=" << fixed << setprecision(3) << timeout;
-      sout << " --wall-time=" << fixed << setprecision(3) << timeout * 5;
+      sout << " --wall-time=" << fixed << setprecision(3) << timeout * 2;
    }
    sout << " --extra-time=0.2";
    sout << " --run -- " << comm;
