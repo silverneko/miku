@@ -166,9 +166,9 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       fscanf(Pipe, "%d", &result);
       pclose(Pipe);
       if(result == 0)
-         sub.verdict[td] = WA;
-      else
          sub.verdict[td] = AC;
+      else
+         sub.verdict[td] = WA;
       return ;
    }
 
