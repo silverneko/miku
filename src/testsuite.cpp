@@ -162,7 +162,7 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       sout << "/tmp/box/" << boxid << "/box/output ";
       string ttout(sout.str());
       FILE* Pipe = popen((sjpath+ttout+tdin+tdout).c_str(), "r");
-      int result = 0;
+      int result = 1;
       fscanf(Pipe, "%d", &result);
       pclose(Pipe);
       if(result == 0)
