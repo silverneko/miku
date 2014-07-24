@@ -25,11 +25,13 @@ int sandboxExec(int boxid, const sandboxOptions &opt, const string &comm)
    double timeout = opt.timeout * 0.001;
    if(opt.timeout != 0){
       sout << " --time=" << fixed << setprecision(3) << timeout;
-      //sout << " --wall-time=" << fixed << setprecision(3) << timeout * 10;
+      sout << " --wall-time=" << fixed << setprecision(3) << timeout * 2;
    }
    sout << " --extra-time=0.2";
    sout << " --run -- " << comm;
    system(sout.str().c_str());
+   
+   cerr << "[debug] box-" << boxid << " executed command : " << sout.str() << endl;
    return 0;
 }
 
@@ -37,6 +39,7 @@ int sandboxInit(int boxid)
 {
    ostringstream sout;
    sout << "isolate --box-id=" << boxid;
+   sout << " --cg";
    sout << " --init 2>/dev/null >/dev/null";
    system(sout.str().c_str());
    cerr << "[debug] box-" << boxid << " inited" << endl;
@@ -47,6 +50,7 @@ int sandboxDele(int boxid)
 {
    ostringstream sout;
    sout << "isolate --box-id=" << boxid;
+   sout << " --cg";
    sout << " --cleanup 2>/dev/null >/dev/null";
    system(sout.str().c_str());
    cerr << "[debug] box-" << boxid << " cleaned" << endl;

@@ -3,3 +3,6 @@ testdata/
 testzone/
 bin/
 build/
+app/tioj_url.py
+app/tioj_url.pyc
+/start_script.sh

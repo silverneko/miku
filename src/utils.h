@@ -1,6 +1,7 @@
 #ifndef UTILS
 #define UTILS
 
+#include<sstream>
 #include<string>
 
 using namespace std;
@@ -20,10 +21,11 @@ enum RESULTS{
 };
 
 class fromVerdict{
-	public:
 		const int verdict;
-		fromVerdict(int verdict) : verdict(verdict) {}
-		const char* to_str()
+	public:
+      explicit fromVerdict();
+		explicit fromVerdict(int verdict) : verdict(verdict) {}
+		const char* toStr() const
 		{
 			switch(verdict){
 				case AC:
@@ -33,71 +35,107 @@ class fromVerdict{
 				case TLE:
 					return "Time Limit Exceeded";
 				case MLE:
-					return "Memory Limit Exceeded";
+					return "Segmentation Fault";
 				case OLE:
 					return "Output Limit Exceeded";
 				case RE:
-					return "Runtime Error";
+					return "Runtime Error (exited with nonzero status)";
 				case SIG:
-					return "Exited with Signal";
+					return "Runtime Error (exited with signal)";
 				case CE:
 					return "Compile Error";
 				case CO:
-					return "Compiling Timed Out";
+					return "Compilation Timed Out";
 				case ER:
-				default:
-					return "Congradulations! You just panicked the judge.";
+					return "WTF!";
+                                default:
+                                        return "nil";
+			}
+		}
+		const char* toAbr() const
+		{
+			switch(verdict){
+				case AC:
+					return "AC";
+				case WA:
+					return "WA";
+				case TLE:
+					return "TLE";
+				case MLE:
+					return "MLE";
+				case OLE:
+					return "OLE";
+				case RE:
+					return "RE";
+				case SIG:
+					return "SIG";
+				case CE:
+					return "CE";
+				case CO:
+					return "CO";
+				case ER:
+					return "ER";
+                                default:
+                                        return "";
 			}
 		}
 };
 
-class result{
+class cast{
+      const string val;
    public:
-      int testdata_count;
-      int verdict[200];
-      double score[200];
-      int mem[200], time[200];
-      result()
+      explicit cast();
+      cast(const string& c) : val(c) {}
+      template<typename T> T to() const
       {
-         testdata_count = 0;
-      }
-};
-
-class problem{
-   public:
-      int problem_type;
-      string special_judge;
-      int mem_limit;
-      int time_limit;
-      int testdata_count;
-      problem()
-      {
-         problem_type = 0;
-         special_judge = "";
-         mem_limit = 0;
-         time_limit = 0;
-         testdata_count = 0;
+         T res;
+         istringstream in(val);
+         in >> res;
+         return res;
       }
 };
 
 class submission{
    public:
+      //meta
       int problem_id;
       int submission_id;
-      string source;
+      string code;
+      string sjcode;
+      string interlib;
       string lang;
       string std;
       string submitter;
       int submitter_id;
+      //problem
+      int problem_type;
+      string special_judge;
+      //test result
+      int testdata_count;
+      int mem_limit[200];
+      int time_limit[200];
+      int verdict[200];
+      int mem[200], time[200];
+      
       submission()
       {
          problem_id = 0;
          submission_id = 0;
-         source = "";
+         code = "";
+         sjcode = "";
+         interlib = "";
          lang = "";
          std = "";
          submitter = "";
          submitter_id = 0;
+         problem_type = 0;
+         special_judge = "";
+         testdata_count = 0;
+         fill(mem_limit, mem_limit + 200, 0);
+         fill(time_limit, time_limit + 200, 0);
+         fill(verdict, verdict + 200, 0);
+         fill(mem, mem + 200, 0);
+         fill(time, time + 200, 0);
       }
 };
 
