@@ -74,13 +74,13 @@ int main(int argc, char *argv[])
          if(status == -2){
             cerr << "[ERROR] Unable to connect to TIOJ url" << endl; 
          }
-         usleep(3000000);
+         usleep(1000000);
          continue;
       }
       cerr << "Recieved submission [" << sub.submission_id << "]" << endl;
       respondValidating(sub.submission_id);
       if(fetchProblem(sub) == -1){
-         usleep(3000000);
+         usleep(1000000);
          cerr << "[ERROR] Unable to fetch problem meta" << endl;
          continue;
       }
