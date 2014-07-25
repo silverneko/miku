@@ -215,8 +215,13 @@ int compile(const submission& target, int boxid, int spBoxid)
    ostringstream sout;
    sout << "/tmp/box/" << boxid << "/box/";
    string boxdir(sout.str());
-
-   ofstream fout(boxdir + "main.cpp");
+   
+   ofstream fout;
+   if(target.lang == "c++"){
+      fout.open(boxdir + "main.cpp");
+   }else{
+      fout.open(boxdir + "main.c");
+   }
    fout << target.code << flush;
    fout.close();
    
@@ -232,7 +237,7 @@ int compile(const submission& target, int boxid, int spBoxid)
    if(target.lang == "c++"){
       sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 ";
    }else{
-      sout << "/usr/bin/gcc ./main.cpp -o ./main.out -O2 ";
+      sout << "/usr/bin/gcc ./main.c -o ./main.out -O2 ";
    }
    if(!target.std.empty()){
       sout << "-std=" << target.std << " ";
