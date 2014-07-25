@@ -237,7 +237,7 @@ int compile(const submission& target, int boxid, int spBoxid)
    if(target.lang == "c++"){
       sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 ";
    }else{
-      sout << "/usr/bin/gcc ./main.c -o ./main.out -O2 ";
+      sout << "/usr/bin/gcc ./main.c -o ./main.out -O2 -ansi ";
    }
    if(!target.std.empty()){
       sout << "-std=" << target.std << " ";
