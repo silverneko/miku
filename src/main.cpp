@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
    //initialize
    bool verbose = false;
    int MAXPARNUM = 1, BOXOFFSET = 10;
+   bool AGGUPDATE = false;
    for(int i = 1; i < argc; ++i){
       if(argv[i][0] == '-'){
          string option(argv[i]+1);
@@ -30,6 +31,8 @@ int main(int argc, char *argv[])
             }else if(option == "-boxoffset"){
                BOXOFFSET = cast(argv[i+1]).to<int>();
                ++i;
+            }else if(option == "-aggressive-update"){
+               AGGUPDATE = true;
             }
          }else{
             switch(option[0]){
@@ -44,7 +47,8 @@ int main(int argc, char *argv[])
                   BOXOFFSET = cast(argv[i+1]).to<int>();
                   ++i;
                   break;
-               
+               case 'a':
+                  AGGUPDATE = true;
             }
          }
       }
@@ -85,7 +89,7 @@ int main(int argc, char *argv[])
          continue;
       }
       
-      int verdict = testsuite(sub, MAXPARNUM, BOXOFFSET);
+      int verdict = testsuite(sub, MAXPARNUM, BOXOFFSET, AGGUPDATE);
       sendResult(sub, verdict, true);
    }
 

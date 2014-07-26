@@ -19,7 +19,7 @@ int compile(const submission& target, int boxid, int spBoxid);
 void eval(submission &sub, int td, int boxid, int spBoxid);
 void getExitStatus(submission &sub, int td);
 
-int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
+int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET, bool AGGUPDATE)
 {
    system("rm -f ./testzone/*");
    const int testBoxid = BOXOFFSET + 0, spBoxid = BOXOFFSET + 1;
@@ -45,7 +45,9 @@ int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
          }
          int td = proc[cid];
          eval(sub, td, BOXOFFSET + 10 + td, spBoxid);
-         sendResult(sub, OK, false);
+         if(AGGUPDATE){
+            sendResult(sub, OK, false);
+         }
          //cerr << "td" << td << " : " << sub.verdict[td] << endl;
          sandboxDele(BOXOFFSET + 10 + td);
          --procnum;
@@ -86,7 +88,9 @@ int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
       const int td = proc[cid];
       //sub.verdict[td] = eval(problem_id, td);
       eval(sub, td, BOXOFFSET + 10 + td, spBoxid);
-      sendResult(sub, OK, false);
+      if(AGGUPDATE){
+         sendResult(sub, OK, false);
+      }
       //cerr << "td" << td << " : " << sub.verdict[td] << endl;
       sandboxDele(BOXOFFSET + 10 + td);
       --procnum;
