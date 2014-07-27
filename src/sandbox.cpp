@@ -20,7 +20,7 @@ int sandboxExec(int boxid, const sandboxOptions &opt, const string &comm)
    if(!opt.output.empty()) sout << " --stdout=" << opt.output;
    if(!opt.errout.empty()) sout << " --stderr=" << opt.errout;
    if(!opt.meta.empty()) sout << " --meta=" << opt.meta;
-   if(opt.mem != 0) sout << " --mem=" << opt.mem << " --cg-mem=" << opt.mem + 65536;
+   if(opt.mem != 0) sout << " --mem=" << opt.mem
    sout << " --processes=" << opt.procs;
    double timeout = opt.timeout * 0.001;
    if(opt.timeout != 0){

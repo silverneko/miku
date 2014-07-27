@@ -119,7 +119,7 @@ void setExitStatus(submission &sub, int td)
    }
 
    //mem_used
-   sub.mem[td] = cast(META["cg-mem"]).to<int>();
+   sub.mem[td] = cast(META["max-rss"]).to<int>();
    //time_used
    sub.time[td] = 1000 * cast(META["time"]).to<double>();
    //verdict
