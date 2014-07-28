@@ -239,9 +239,9 @@ int compile(const submission& target, int boxid, int spBoxid)
 
    sout.str("");
    if(target.lang == "c++"){
-      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 -pipe ";
+      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 ";
    }else{
-      sout << "/usr/bin/gcc ./main.c -o ./main.out -O2 -ansi -pipe ";
+      sout << "/usr/bin/gcc ./main.c -o ./main.out -O2 -ansi ";
    }
    if(!target.std.empty()){
       sout << "-std=" << target.std << " ";
@@ -270,7 +270,7 @@ int compile(const submission& target, int boxid, int spBoxid)
       fout.close();
       
       sout.str("");
-      sout << "/usr/bin/g++ ./sj.cpp -o ./sj.out -O2 -std=c++11 -pipe ";
+      sout << "/usr/bin/g++ ./sj.cpp -o ./sj.out -O2 -std=c++11 ";
       
       opt.meta = "./testzone/metacompsj";
 
