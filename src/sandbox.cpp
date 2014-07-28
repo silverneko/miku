@@ -27,6 +27,7 @@ int sandboxExec(int boxid, const sandboxOptions &opt, const string &comm)
       sout << " --time=" << fixed << setprecision(3) << timeout;
       sout << " --wall-time=" << fixed << setprecision(3) << timeout * 2;
    }
+   sout << " --file-limit=" << opt.file_limit;
    sout << " --extra-time=0.2";
    sout << " --run -- " << comm;
    cerr << "[debug] box-" << boxid << " execute command : " << sout.str() << endl;
