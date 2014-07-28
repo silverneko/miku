@@ -1238,7 +1238,10 @@ setup_rlimits(void)
     RLIM(AS, memory_limit * 1024);
 
   RLIM(STACK, (stack_limit ? (rlim_t)stack_limit * 1024 : RLIM_INFINITY));
-  RLIM(NOFILE, 64);
+  //RLIM(NOFILE, 64);
+  RLIM(NOFILE, 5);
+  RLIM(FSIZE, 65536*1024);
+
   RLIM(MEMLOCK, 0);
 
   if (max_processes)
