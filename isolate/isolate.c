@@ -43,6 +43,7 @@ static int extra_timeout;
 static int pass_environ;
 static int verbose;
 static int memory_limit;
+static int file_limit;
 static int stack_limit;
 static int block_quota;
 static int inode_quota;
@@ -1239,7 +1240,10 @@ setup_rlimits(void)
 
   RLIM(STACK, (stack_limit ? (rlim_t)stack_limit * 1024 : RLIM_INFINITY));
   //RLIM(NOFILE, 64);
-  RLIM(NOFILE, 5);
+  if(file_limit)
+    RLIM(NOFILE, file_limit);
+  else
+    RLIM(NOFILE, 64);
   RLIM(FSIZE, 65536*1024);
 
   RLIM(MEMLOCK, 0);
@@ -1422,7 +1426,7 @@ enum opt_code {
   OPT_CG_TIMING,
 };
 
-static const char short_opts[] = "b:c:d:eE:i:k:m:M:o:p::q:r:t:vw:x:";
+static const char short_opts[] = "b:c:d:eE:i:k:m:M:o:p::q:r:t:vw:x:f:";
 
 static const struct option long_opts[] = {
   { "box-id",		1, NULL, 'b' },
@@ -1449,6 +1453,7 @@ static const struct option long_opts[] = {
   { "verbose",		0, NULL, 'v' },
   { "version",		0, NULL, OPT_VERSION },
   { "wall-time",	1, NULL, 'w' },
+  { "file-limit",	1, NULL, 'f' },
   { NULL,		0, NULL, 0 }
 };
 
@@ -1541,6 +1546,9 @@ main(int argc, char **argv)
 	break;
       case OPT_CG_TIMING:
 	cg_timing = 1;
+	break;
+      case 'f':
+	file_limit = atoi(optarg);
 	break;
       default:
 	usage(NULL);

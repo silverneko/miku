@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
    opt.meta = "./testzone/META" + sout.str();
    opt.timeout = time_limit;
    opt.mem = mem_limit;
+   opt.file_limit = 5;
    
    //invoke box command
    sandboxExec(boxid, opt, "main.out");
