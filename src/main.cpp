@@ -14,24 +14,11 @@
 
 using namespace std;
 
-//int MAXPARNUM;
-//int BOXOFFSET;
-//bool AGGUPDATE;
-
-const char optstring[] = "vp:b:a";
-
-const struct option longopts[] = {
-   {"verbose",             no_argument,         NULL,    'v'},
-   {"parallel",            required_argument,   NULL,    'p'},
-   {"boxoffset",           required_argument,   NULL,    'b'},
-   {"aggressive-update",   no_argument,         NULL,    'a'},
-   {NULL,                  0,                   NULL,    0}
-};
-
 void usage()
 {
    cout << "\
 Usage:\n\
+\n\
 -v(, or --verbose) for extra verbosity\n\
 -p(, or --parallel) [NUMBER] to have maxium [NUMBER] of parallel\n\
 processes to evaluate usercode. However this may cause verbosity\n\
@@ -43,6 +30,16 @@ verdict and result."
    << endl;
    exit(2);
 }
+
+const char optstring[] = "vp:b:a";
+
+const struct option longopts[] = {
+   {"verbose",             no_argument,         NULL,    'v'},
+   {"parallel",            required_argument,   NULL,    'p'},
+   {"boxoffset",           required_argument,   NULL,    'b'},
+   {"aggressive-update",   no_argument,         NULL,    'a'},
+   {NULL,                  0,                   NULL,    0}
+};
 
 int main(int argc, char *argv[])
 {
@@ -78,12 +75,6 @@ int main(int argc, char *argv[])
       cerr << "Must be started as root !" << endl;
       return 0;
    }
-   /*
-   if(access("./testdata", F_OK))
-      system("mkdir ./testdata");
-   if(access("./testzone", F_OK))
-      system("mkdir ./testzone");
-   */
    
    while(true){
       submission sub;
@@ -106,7 +97,6 @@ int main(int argc, char *argv[])
       int verdict = testsuite(sub);
       sendResult(sub, verdict, true);
    }
-
 
    return 0;
 }
