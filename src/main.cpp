@@ -1,11 +1,12 @@
 #include<iostream>
+#include<sstream>
+#include<fstream>
+#include<iomanip>
 #include<algorithm>
 #include<cstdio>
 #include<unistd.h>
 #include<sys/types.h>
-#include<sstream>
-#include<fstream>
-#include<iomanip>
+#include<getopt.h>
 #include"utils.h"
 #include"config.h"
 #include"testsuite.h"
@@ -13,44 +14,57 @@
 
 using namespace std;
 
+//int MAXPARNUM;
+//int BOXOFFSET;
+//bool AGGUPDATE;
+
+const char optstring[] = "vp:b:a";
+
+const struct option longopts[] = {
+   {"verbose",             no_argument,         NULL,    'v'},
+   {"parallel",            required_argument,   NULL,    'p'},
+   {"boxoffset",           required_argument,   NULL,    'b'},
+   {"aggressive-update",   no_argument,         NULL,    'a'},
+   {NULL,                  0,                   NULL,    0}
+};
+
+void usage()
+{
+   cout << "\
+Usage:\n\
+-v(, or --verbose) for extra verbosity\n\
+-p(, or --parallel) [NUMBER] to have maxium [NUMBER] of parallel\n\
+processes to evaluate usercode. However this may cause verbosity\n\
+messages unreadable.\n\
+-b [NUMBER] to set sandbox indexing offset. Need to be set to an\n\
+appropriate number if running multiple judgse on one computer.\n\
+-a(, or --aggressive-update) add this to aggressivly update\n\
+verdict and result."
+   << endl;
+   exit(2);
+}
+
 int main(int argc, char *argv[])
 {
    //initialize
    bool verbose = false;
-   int MAXPARNUM = 1, BOXOFFSET = 10;
-   bool AGGUPDATE = false;
-   for(int i = 1; i < argc; ++i){
-      if(argv[i][0] == '-'){
-         string option(argv[i]+1);
-         if(option[0] == '-'){
-            if(option == "-verbose"){
-               verbose = true;
-            }else if(option == "-parallel"){
-               MAXPARNUM = cast(argv[i+1]).to<int>();
-               ++i;
-            }else if(option == "-boxoffset"){
-               BOXOFFSET = cast(argv[i+1]).to<int>();
-               ++i;
-            }else if(option == "-aggressive-update"){
-               AGGUPDATE = true;
-            }
-         }else{
-            switch(option[0]){
-               case 'v':
-                  verbose = true;
-                  break;
-               case 'p':
-                  MAXPARNUM = cast(argv[i+1]).to<int>();
-                  ++i;
-                  break;
-               case 'b':
-                  BOXOFFSET = cast(argv[i+1]).to<int>();
-                  ++i;
-                  break;
-               case 'a':
-                  AGGUPDATE = true;
-            }
-         }
+   int ac;
+   while((ac = getopt_long(argc, argv, optstring, longopts, NULL)) != -1){
+      switch(ac){
+         case 'v':
+            verbose = true;
+            break;
+         case 'p':
+            MAXPARNUM = cast(optarg).to<int>();
+            break;
+         case 'b':
+            BOXOFFSET = cast(optarg).to<int>();
+            break;
+         case 'a':
+            AGGUPDATE = true;
+            break;
+         default:
+            usage();
       }
    }
    
@@ -89,7 +103,7 @@ int main(int argc, char *argv[])
          continue;
       }
       
-      int verdict = testsuite(sub, MAXPARNUM, BOXOFFSET, AGGUPDATE);
+      int verdict = testsuite(sub);
       sendResult(sub, verdict, true);
    }
 

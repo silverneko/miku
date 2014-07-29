@@ -19,7 +19,11 @@ int compile(const submission& target, int boxid, int spBoxid);
 void eval(submission &sub, int td, int boxid, int spBoxid);
 void getExitStatus(submission &sub, int td);
 
-int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET, bool AGGUPDATE)
+int MAXPARNUM = 1;
+int BOXOFFSET = 10;
+bool AGGUPDATE = false;
+
+int testsuite(submission &sub)
 {
    system("rm -f ./testzone/*");
    const int testBoxid = BOXOFFSET + 0, spBoxid = BOXOFFSET + 1;

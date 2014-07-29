@@ -2,6 +2,10 @@
 #define TESTSUITE
 #include"utils.h"
 
-int testsuite(submission&, int, int, bool);
+extern int MAXPARNUM;// = 1;
+extern int BOXOFFSET;// = 10;
+extern bool AGGUPDATE;// = false;
+
+int testsuite(submission&);
 
 #endif
