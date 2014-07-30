@@ -196,8 +196,6 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       t="";
       getline(tsol,s);
       getline(mout,t);
-      s.erase(s.find_last_not_of(" \n\r\t")+1);
-      t.erase(t.find_last_not_of(" \n\r\t")+1);
       if(t==""&&s!=""){
          status = WA;
          break;
@@ -209,6 +207,8 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       if(t==""&&s==""){
          break;
       }
+      s.erase(s.find_last_not_of(" \n\r\t")+1);
+      t.erase(t.find_last_not_of(" \n\r\t")+1);
       if(s!=t){
          status = WA;
          break;
