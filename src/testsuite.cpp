@@ -181,7 +181,6 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
    }
 
    int status = AC;
-   string s, t;
    //solution output
    ostringstream sout;
    sout << "./testdata/" << setfill('0') << setw(4) << problem_id
@@ -191,25 +190,20 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
    sout.str("");
    sout << "/tmp/box/" << boxid << "/box/output";
    fstream mout(sout.str());
-   while(1){
-      s="";
-      t="";
+   while(true){
+      if(tsol.eof() != mout.eof()){
+         status = WA;
+         break;
+      }
+      if(tsol.eof() && mout.eof()){
+         break;
+      }
+      string s, t;
       getline(tsol,s);
       getline(mout,t);
-      if(t==""&&s!=""){
-         status = WA;
-         break;
-      }
-      if(t!=""&&s==""){
-         status = WA;
-         break;
-      }
-      if(t==""&&s==""){
-         break;
-      }
       s.erase(s.find_last_not_of(" \n\r\t")+1);
       t.erase(t.find_last_not_of(" \n\r\t")+1);
-      if(s!=t){
+      if(s != t){
          status = WA;
          break;
       }
