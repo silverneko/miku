@@ -143,11 +143,6 @@ int fetchProblem(submission &sub)
    }
    pclose(Pipe);
 
-
-   //Only have Batch judge now, haven't done anything for `special`
-   //`interactive`, `output only` yet
-
-
    return 0;
 }
 
@@ -178,22 +173,5 @@ int sendResult(submission &sub, int verdict, bool done)
    }
    system(sout.str().c_str());
    return 0;
-   /*
-   if(verdict != CE){
-      for(int i = 0; i < sub.testdata_count; ++i){
-         verdict = max(verdict, sub.verdict[i]);
-         cerr << "td" << i << " : time " << sub.time[i];
-         cerr << " mem " << sub.mem[i];
-         cerr << " verdict " << fromVerdict(sub.verdict[i]).toStr();
-         cerr << endl;
-      }
-   }
-   ostringstream sout;
-   sout << "update_verdict.py" << ' ' << sub.submission_id << ' ';
-   //sout << "'"<< fromVerdict(verdict).toStr() << "'";
-   sout << "'"<< fromVerdict(verdict).toAbr() << "'";
-   system(sout.str().c_str());
-   return 0;
-   */
 }
 

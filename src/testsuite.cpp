@@ -192,15 +192,51 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
    fstream mout(sout.str());
    while(true){
       if(tsol.eof() != mout.eof()){
-         status = WA;
+         while(tsol.eof() != mout.eof()){
+            string s;
+            if(tsol.eof()){
+               getline(mout, s);
+            }else{
+               getline(tsol, s);
+            }
+            s.erase(s.find_last_not_of(" \n\r\t") + 1);
+            if(s != ""){
+               status = WA;
+               break;
+            }
+         }
          break;
+         /*
+         if(tsol.eof()){
+            while(!mout.eof()){
+               string s;
+               getline(mout, s);
+               s.erase(s.find_last_not_of(" \n\r\t") + 1);
+               if(s != ""){
+                  status = WA;
+                  break;
+               }
+            }
+         }else{
+            while(!tsol.eof()){
+               string s;
+               getline(tsol, s);
+               s.erase(s.find_last_not_of(" \n\r\t") + 1);
+               if(s != ""){
+                  status = WA;
+                  break;
+               }
+            }
+         }
+         break;
+         */
       }
       if(tsol.eof() && mout.eof()){
          break;
       }
       string s, t;
-      getline(tsol,s);
-      getline(mout,t);
+      getline(tsol, s);
+      getline(mout, t);
       s.erase(s.find_last_not_of(" \n\r\t") + 1);
       t.erase(t.find_last_not_of(" \n\r\t") + 1);
       if(s != t){
