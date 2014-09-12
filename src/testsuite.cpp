@@ -161,10 +161,10 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       sout << "/tmp/box/" << spBoxid << "/box/sj.out ";
       string sjpath(sout.str());
       sout.str("");
-      sout << "./testdata" << setfill('0') << setw(4) << problem_id << "/input" << setw(3) << td << ' ';
+      sout << "./testdata/" << setfill('0') << setw(4) << problem_id << "/input" << setw(3) << td << ' ';
       string tdin(sout.str());
       sout.str("");
-      sout << "./testdata" << setfill('0') << setw(4) << problem_id << "/output" << setw(3) << td << ' ';
+      sout << "./testdata/" << setfill('0') << setw(4) << problem_id << "/output" << setw(3) << td << ' ';
       string tdout(sout.str());
       sout.str("");
       sout << "/tmp/box/" << boxid << "/box/output ";
@@ -173,6 +173,8 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       int result = 1;
       fscanf(Pipe, "%d", &result);
       pclose(Pipe);
+      cout << "[special judge] :" << (sjpath+ttout+tdin+tdout) << endl;
+      cout << "[special judge] td:" << td << " result:" << result << endl;
       if(result == 0)
          sub.verdict[td] = AC;
       else
