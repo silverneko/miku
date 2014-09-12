@@ -142,12 +142,7 @@ int fetchProblem(submission &sub)
       fscanf(Pipe, "%d %d", &sub.time_limit[i], &sub.mem_limit[i]);
    }
    pclose(Pipe);
-
-
-   //Only have Batch judge now, haven't done anything for `special`
-   //`interactive`, `output only` yet
-
-
+   
    return 0;
 }
 
