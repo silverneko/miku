@@ -161,10 +161,10 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       sout << "/tmp/box/" << spBoxid << "/box/sj.out ";
       string sjpath(sout.str());
       sout.str("");
-      sout << "./testdata" << setfill('0') << setw(4) << problem_id << "/input" << setw(3) << td << ' ';
+      sout << "./testdata/" << setfill('0') << setw(4) << problem_id << "/input" << setw(3) << td << ' ';
       string tdin(sout.str());
       sout.str("");
-      sout << "./testdata" << setfill('0') << setw(4) << problem_id << "/output" << setw(3) << td << ' ';
+      sout << "./testdata/" << setfill('0') << setw(4) << problem_id << "/output" << setw(3) << td << ' ';
       string tdout(sout.str());
       sout.str("");
       sout << "/tmp/box/" << boxid << "/box/output ";
@@ -173,6 +173,8 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       int result = 1;
       fscanf(Pipe, "%d", &result);
       pclose(Pipe);
+      cout << "[special judge] :" << (sjpath+ttout+tdin+tdout) << endl;
+      cout << "[special judge] td:" << td << " result:" << result << endl;
       if(result == 0)
          sub.verdict[td] = AC;
       else
@@ -192,15 +194,51 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
    fstream mout(sout.str());
    while(true){
       if(tsol.eof() != mout.eof()){
-         status = WA;
+         while(tsol.eof() != mout.eof()){
+            string s;
+            if(tsol.eof()){
+               getline(mout, s);
+            }else{
+               getline(tsol, s);
+            }
+            s.erase(s.find_last_not_of(" \n\r\t") + 1);
+            if(s != ""){
+               status = WA;
+               break;
+            }
+         }
          break;
+         /*
+         if(tsol.eof()){
+            while(!mout.eof()){
+               string s;
+               getline(mout, s);
+               s.erase(s.find_last_not_of(" \n\r\t") + 1);
+               if(s != ""){
+                  status = WA;
+                  break;
+               }
+            }
+         }else{
+            while(!tsol.eof()){
+               string s;
+               getline(tsol, s);
+               s.erase(s.find_last_not_of(" \n\r\t") + 1);
+               if(s != ""){
+                  status = WA;
+                  break;
+               }
+            }
+         }
+         break;
+         */
       }
       if(tsol.eof() && mout.eof()){
          break;
       }
       string s, t;
-      getline(tsol,s);
-      getline(mout,t);
+      getline(tsol, s);
+      getline(mout, t);
       s.erase(s.find_last_not_of(" \n\r\t") + 1);
       t.erase(t.find_last_not_of(" \n\r\t") + 1);
       if(s != t){
@@ -239,7 +277,7 @@ int compile(const submission& target, int boxid, int spBoxid)
    if(target.lang == "c++"){
       sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 ";
    }else{
-      sout << "/usr/bin/gcc ./main.c -o ./main.out -O2 -ansi ";
+      sout << "/usr/bin/gcc ./main.c -o ./main.out -O2 -ansi -lm ";
    }
    if(!target.std.empty()){
       sout << "-std=" << target.std << " ";
