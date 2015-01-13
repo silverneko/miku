@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
    
    //set options
    sandboxOptions opt;
-      //opt.dirs.push_back("/tmp/box/10/box");
+   //opt.dirs.push_back("/tmp/box/10/box");
    opt.cgroup = true;
    opt.procs = 1;
    opt.input = "input";

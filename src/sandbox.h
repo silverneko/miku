@@ -19,7 +19,8 @@ class sandboxOptions{
       int procs;           //--processes
       int timeout;         //--time in ms
       int file_limit;      //--file-limit number of opened files
-      sandboxOptions() : cgroup(true), preserve_env(false), mem(0), procs(1), timeout(0), file_limit(64) {}
+      int fsize_limit;     //--fsize in kilobytes
+      sandboxOptions() : cgroup(true), preserve_env(false), mem(0), procs(1), timeout(0), file_limit(64), fsize_limit(0) {}
 };
 
 int sandboxInit(int boxid);
