@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
    opt.timeout = time_limit;
    opt.mem = mem_limit;
    opt.file_limit = 5;
+   opt.fsize_limit = 65536;
    
    //invoke box command
    sandboxExec(boxid, opt, "main.out");
