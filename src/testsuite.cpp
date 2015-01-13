@@ -259,8 +259,10 @@ int compile(const submission& target, int boxid, int spBoxid)
    ofstream fout;
    if(target.lang == "c++"){
       fout.open(boxdir + "main.cpp");
-   }else{
+   }else if(target.lang == "c"){
       fout.open(boxdir + "main.c");
+   }else{
+      fout.open(boxdir + "main.hs");
    }
    fout << target.code << flush;
    fout.close();
@@ -276,15 +278,18 @@ int compile(const submission& target, int boxid, int spBoxid)
    sout.str("");
    if(target.lang == "c++"){
       sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 ";
-   }else{
+   }else if(target.lang == "c"){
       sout << "/usr/bin/gcc ./main.c -o ./main.out -O2 -ansi -lm ";
+   }else{
+      sout << "/usr/bin/ghc ./main.hs -o ./main.out -O -tmpdir ./";
    }
    if(!target.std.empty()){
       sout << "-std=" << target.std << " ";
    }
    string comm(sout.str());
    sandboxOptions opt;
-   opt.dirs.push_back("/etc/");
+   opt.dirs.push_back("/etc");
+   opt.dirs.push_back("/var");
    opt.procs = 50;
    opt.preserve_env = true;
    opt.errout = "compile_error";
