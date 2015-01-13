@@ -281,7 +281,7 @@ int compile(const submission& target, int boxid, int spBoxid)
    }else if(target.lang == "c"){
       sout << "/usr/bin/env gcc ./main.c -o ./main.out -O2 -ansi -lm ";
    }else{
-      sout << "/usr/bin/env ghc ./main.hs -o ./main.out -O -tmpdir ./";
+      sout << "/usr/bin/env ghc ./main.hs -o ./main.out -O -tmpdir . ";
    }
    if(!target.std.empty()){
       sout << "-std=" << target.std << " ";
@@ -293,6 +293,7 @@ int compile(const submission& target, int boxid, int spBoxid)
    opt.procs = 50;
    opt.preserve_env = true;
    opt.errout = "compile_error";
+   opt.output = "/dev/null";
    opt.timeout = 60 * 1000;
    opt.meta = "./testzone/metacomp";
 
