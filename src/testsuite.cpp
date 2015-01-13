@@ -277,19 +277,19 @@ int compile(const submission& target, int boxid, int spBoxid)
 
    sout.str("");
    if(target.lang == "c++"){
-      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 ";
+      sout << "/usr/bin/env g++ ./main.cpp -o ./main.out -O2 ";
    }else if(target.lang == "c"){
-      sout << "/usr/bin/gcc ./main.c -o ./main.out -O2 -ansi -lm ";
+      sout << "/usr/bin/env gcc ./main.c -o ./main.out -O2 -ansi -lm ";
    }else{
-      sout << "/usr/bin/ghc ./main.hs -o ./main.out -O -tmpdir ./";
+      sout << "/usr/bin/env ghc ./main.hs -o ./main.out -O -tmpdir ./";
    }
    if(!target.std.empty()){
       sout << "-std=" << target.std << " ";
    }
    string comm(sout.str());
    sandboxOptions opt;
-   opt.dirs.push_back("/etc");
-   opt.dirs.push_back("/var");
+   //opt.dirs.push_back("/etc");
+   //opt.dirs.push_back("/var");
    opt.procs = 50;
    opt.preserve_env = true;
    opt.errout = "compile_error";
