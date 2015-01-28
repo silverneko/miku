@@ -19,7 +19,11 @@ int compile(const submission& target, int boxid, int spBoxid);
 void eval(submission &sub, int td, int boxid, int spBoxid);
 void getExitStatus(submission &sub, int td);
 
-int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
+int MAXPARNUM = 1;
+int BOXOFFSET = 10;
+bool AGGUPDATE = false;
+
+int testsuite(submission &sub)
 {
    system("rm -f ./testzone/*");
    const int testBoxid = BOXOFFSET + 0, spBoxid = BOXOFFSET + 1;
@@ -45,7 +49,9 @@ int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
          }
          int td = proc[cid];
          eval(sub, td, BOXOFFSET + 10 + td, spBoxid);
-         sendResult(sub, OK, false);
+         if(AGGUPDATE){
+            sendResult(sub, OK, false);
+         }
          //cerr << "td" << td << " : " << sub.verdict[td] << endl;
          sandboxDele(BOXOFFSET + 10 + td);
          --procnum;
@@ -86,7 +92,9 @@ int testsuite(submission &sub, int MAXPARNUM, int BOXOFFSET)
       const int td = proc[cid];
       //sub.verdict[td] = eval(problem_id, td);
       eval(sub, td, BOXOFFSET + 10 + td, spBoxid);
-      sendResult(sub, OK, false);
+      if(AGGUPDATE){
+         sendResult(sub, OK, false);
+      }
       //cerr << "td" << td << " : " << sub.verdict[td] << endl;
       sandboxDele(BOXOFFSET + 10 + td);
       --procnum;
@@ -115,7 +123,7 @@ void setExitStatus(submission &sub, int td)
    }
 
    //mem_used
-   sub.mem[td] = cast(META["cg-mem"]).to<int>();
+   sub.mem[td] = cast(META["max-rss"]).to<int>();
    //time_used
    sub.time[td] = 1000 * cast(META["time"]).to<double>();
    //verdict
@@ -153,10 +161,10 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       sout << "/tmp/box/" << spBoxid << "/box/sj.out ";
       string sjpath(sout.str());
       sout.str("");
-      sout << "./testdata" << setfill('0') << setw(4) << problem_id << "/input" << setw(3) << td << ' ';
+      sout << "./testdata/" << setfill('0') << setw(4) << problem_id << "/input" << setw(3) << td << ' ';
       string tdin(sout.str());
       sout.str("");
-      sout << "./testdata" << setfill('0') << setw(4) << problem_id << "/output" << setw(3) << td << ' ';
+      sout << "./testdata/" << setfill('0') << setw(4) << problem_id << "/output" << setw(3) << td << ' ';
       string tdout(sout.str());
       sout.str("");
       sout << "/tmp/box/" << boxid << "/box/output ";
@@ -165,6 +173,8 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
       int result = 1;
       fscanf(Pipe, "%d", &result);
       pclose(Pipe);
+      cout << "[special judge] :" << (sjpath+ttout+tdin+tdout) << endl;
+      cout << "[special judge] td:" << td << " result:" << result << endl;
       if(result == 0)
          sub.verdict[td] = AC;
       else
@@ -173,7 +183,6 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
    }
 
    int status = AC;
-   string s, t;
    //solution output
    ostringstream sout;
    sout << "./testdata/" << setfill('0') << setw(4) << problem_id
@@ -183,25 +192,56 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
    sout.str("");
    sout << "/tmp/box/" << boxid << "/box/output";
    fstream mout(sout.str());
-   while(1){
-      s="";
-      t="";
-      getline(tsol,s);
-      getline(mout,t);
-      if(t==""&&s!=""){
-         status = WA;
+   while(true){
+      if(tsol.eof() != mout.eof()){
+         while(tsol.eof() != mout.eof()){
+            string s;
+            if(tsol.eof()){
+               getline(mout, s);
+            }else{
+               getline(tsol, s);
+            }
+            s.erase(s.find_last_not_of(" \n\r\t") + 1);
+            if(s != ""){
+               status = WA;
+               break;
+            }
+         }
+         break;
+         /*
+         if(tsol.eof()){
+            while(!mout.eof()){
+               string s;
+               getline(mout, s);
+               s.erase(s.find_last_not_of(" \n\r\t") + 1);
+               if(s != ""){
+                  status = WA;
+                  break;
+               }
+            }
+         }else{
+            while(!tsol.eof()){
+               string s;
+               getline(tsol, s);
+               s.erase(s.find_last_not_of(" \n\r\t") + 1);
+               if(s != ""){
+                  status = WA;
+                  break;
+               }
+            }
+         }
+         break;
+         */
+      }
+      if(tsol.eof() && mout.eof()){
          break;
       }
-      if(t!=""&&s==""){
-         status = WA;
-         break;
-      }
-      if(t==""&&s==""){
-         break;
-      }
-      s.erase(s.find_last_not_of(" \n\r\t")+1);
-      t.erase(t.find_last_not_of(" \n\r\t")+1);
-      if(s!=t){
+      string s, t;
+      getline(tsol, s);
+      getline(mout, t);
+      s.erase(s.find_last_not_of(" \n\r\t") + 1);
+      t.erase(t.find_last_not_of(" \n\r\t") + 1);
+      if(s != t){
          status = WA;
          break;
       }
@@ -215,8 +255,15 @@ int compile(const submission& target, int boxid, int spBoxid)
    ostringstream sout;
    sout << "/tmp/box/" << boxid << "/box/";
    string boxdir(sout.str());
-
-   ofstream fout(boxdir + "main.cpp");
+   
+   ofstream fout;
+   if(target.lang == "c++"){
+      fout.open(boxdir + "main.cpp");
+   }else if(target.lang == "c"){
+      fout.open(boxdir + "main.c");
+   }else{
+      fout.open(boxdir + "main.hs");
+   }
    fout << target.code << flush;
    fout.close();
    
@@ -230,19 +277,23 @@ int compile(const submission& target, int boxid, int spBoxid)
 
    sout.str("");
    if(target.lang == "c++"){
-      sout << "/usr/bin/g++ ./main.cpp -o ./main.out -O2 ";
+      sout << "/usr/bin/env g++ ./main.cpp -o ./main.out -O2 ";
+   }else if(target.lang == "c"){
+      sout << "/usr/bin/env gcc ./main.c -o ./main.out -O2 -ansi -lm ";
    }else{
-      sout << "/usr/bin/gcc ./main.cpp -o ./main.out -O2 ";
+      sout << "/usr/bin/env ghc ./main.hs -o ./main.out -O -tmpdir . ";
    }
    if(!target.std.empty()){
       sout << "-std=" << target.std << " ";
    }
    string comm(sout.str());
    sandboxOptions opt;
-   opt.dirs.push_back("/etc/");
+   //opt.dirs.push_back("/etc");
+   //opt.dirs.push_back("/var");
    opt.procs = 50;
    opt.preserve_env = true;
    opt.errout = "compile_error";
+   opt.output = "/dev/null";
    opt.timeout = 60 * 1000;
    opt.meta = "./testzone/metacomp";
 

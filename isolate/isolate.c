@@ -33,6 +33,14 @@
 #include <sys/quota.h>
 #include <sys/vfs.h>
 
+/* May not be defined in older glibc headers */
+#ifndef MS_PRIVATE
+#define MS_PRIVATE (1 << 18)
+#endif
+#ifndef MS_REC
+#define MS_REC     (1 << 14)
+#endif
+
 #define NONRET __attribute__((noreturn))
 #define UNUSED __attribute__((unused))
 #define ARRAY_SIZE(a) (int)(sizeof(a)/sizeof(a[0]))
@@ -43,6 +51,8 @@ static int extra_timeout;
 static int pass_environ;
 static int verbose;
 static int memory_limit;
+static int file_limit;
+static int fsize_limit;
 static int stack_limit;
 static int block_quota;
 static int inode_quota;
@@ -1235,10 +1245,16 @@ setup_rlimits(void)
 #define RLIM(res, val) setup_rlim("RLIMIT_" #res, RLIMIT_##res, val)
 
   if (memory_limit)
-    RLIM(AS, memory_limit * 1024);
+    RLIM(AS, (rlim_t)memory_limit * 1024);
 
   RLIM(STACK, (stack_limit ? (rlim_t)stack_limit * 1024 : RLIM_INFINITY));
-  RLIM(NOFILE, 64);
+
+  if(file_limit)
+    RLIM(NOFILE, file_limit);
+
+  if(fsize_limit)
+    RLIM(FSIZE, (rlim_t)fsize_limit * 1024);
+
   RLIM(MEMLOCK, 0);
 
   if (max_processes)
@@ -1383,6 +1399,8 @@ Options:\n\
 \t\t\t\tmaybe\tSkip the rule if <out> does not exist\n\
 \t\t\t\tnoexec\tDo not allow execution of binaries\n\
 \t\t\t\trw\tAllow read-write access\n\
+-s, --fsize=<size>\tMax size (in KB) of files that can be created\n\
+-f, --file-limit=<max>\tAllow at most <max> file descriptors to be opened\n\
 -E, --env=<var>\t\tInherit the environment variable <var> from the parent process\n\
 -E, --env=<var>=<val>\tSet the environment variable <var> to <val>; unset it if <var> is empty\n\
 -x, --extra-time=<time>\tSet extra timeout, before which a timing-out program is not yet killed,\n\
@@ -1419,7 +1437,7 @@ enum opt_code {
   OPT_CG_TIMING,
 };
 
-static const char short_opts[] = "b:c:d:eE:i:k:m:M:o:p::q:r:t:vw:x:";
+static const char short_opts[] = "b:c:d:eE:i:k:m:M:o:p::q:r:t:vw:x:f:s:";
 
 static const struct option long_opts[] = {
   { "box-id",		1, NULL, 'b' },
@@ -1446,6 +1464,8 @@ static const struct option long_opts[] = {
   { "verbose",		0, NULL, 'v' },
   { "version",		0, NULL, OPT_VERSION },
   { "wall-time",	1, NULL, 'w' },
+  { "file-limit",	1, NULL, 'f' },
+  { "fsize",      1, NULL, 's'},
   { NULL,		0, NULL, 0 }
 };
 
@@ -1459,89 +1479,94 @@ main(int argc, char **argv)
   init_dir_rules();
 
   while ((c = getopt_long(argc, argv, short_opts, long_opts, NULL)) >= 0)
-    switch (c)
-      {
+    switch (c){
       case 'b':
-	box_id = atoi(optarg);
-	break;
+        box_id = atoi(optarg);
+        break;
       case 'c':
-	set_cwd = optarg;
-	break;
+        set_cwd = optarg;
+        break;
       case OPT_CG:
-	cg_enable = 1;
-	break;
+        cg_enable = 1;
+        break;
       case 'd':
-	if (!set_dir_action(optarg))
-	  usage("Invalid directory specified: %s\n", optarg);
-	break;
+        if (!set_dir_action(optarg))
+          usage("Invalid directory specified: %s\n", optarg);
+        break;
       case 'e':
-	pass_environ = 1;
-	break;
+        pass_environ = 1;
+        break;
       case 'E':
-	if (!set_env_action(optarg))
-	  usage("Invalid environment specified: %s\n", optarg);
-	break;
+        if (!set_env_action(optarg))
+          usage("Invalid environment specified: %s\n", optarg);
+        break;
       case 'k':
-	stack_limit = atoi(optarg);
-	break;
+        stack_limit = atoi(optarg);
+        break;
       case 'i':
-	redir_stdin = optarg;
-	break;
+        redir_stdin = optarg;
+        break;
       case 'm':
-	memory_limit = atoi(optarg);
-	break;
+        memory_limit = atoi(optarg);
+        break;
       case 'M':
-	meta_open(optarg);
-	break;
+        meta_open(optarg);
+        break;
       case 'o':
-	redir_stdout = optarg;
-	break;
+        redir_stdout = optarg;
+        break;
       case 'p':
-	if (optarg)
-	  max_processes = atoi(optarg);
-	else
-	  max_processes = 0;
-	break;
+        if (optarg)
+          max_processes = atoi(optarg);
+        else
+          max_processes = 0;
+        break;
       case 'q':
-	sep = strchr(optarg, ',');
-	if (!sep)
-	  usage("Invalid quota specified: %s\n", optarg);
-	block_quota = atoi(optarg);
-	inode_quota = atoi(sep+1);
-	break;
+        sep = strchr(optarg, ',');
+        if (!sep)
+          usage("Invalid quota specified: %s\n", optarg);
+        block_quota = atoi(optarg);
+        inode_quota = atoi(sep+1);
+        break;
       case 'r':
-	redir_stderr = optarg;
-	break;
+        redir_stderr = optarg;
+        break;
       case 't':
-	timeout = 1000*atof(optarg);
-	break;
+        timeout = 1000*atof(optarg);
+        break;
       case 'v':
-	verbose++;
-	break;
+        verbose++;
+        break;
       case 'w':
-	wall_timeout = 1000*atof(optarg);
-	break;
+        wall_timeout = 1000*atof(optarg);
+        break;
       case 'x':
-	extra_timeout = 1000*atof(optarg);
-	break;
+        extra_timeout = 1000*atof(optarg);
+        break;
       case OPT_INIT:
       case OPT_RUN:
       case OPT_CLEANUP:
       case OPT_VERSION:
-	if (!mode || mode == c)
-	  mode = c;
-	else
-	  usage("Only one command is allowed.\n");
-	break;
+        if (!mode || mode == c)
+          mode = c;
+        else
+          usage("Only one command is allowed.\n");
+        break;
       case OPT_CG_MEM:
-	cg_memory_limit = atoi(optarg);
-	break;
+        cg_memory_limit = atoi(optarg);
+        break;
       case OPT_CG_TIMING:
-	cg_timing = 1;
-	break;
+        cg_timing = 1;
+        break;
+      case 'f':
+        file_limit = atoi(optarg);
+        break;
+      case 's':
+        fsize_limit = atoi(optarg);
+        break;
       default:
-	usage(NULL);
-      }
+        usage(NULL);
+    }
 
   if (!mode)
     usage("Please specify an isolate command (e.g. --init, --run).\n");
@@ -1560,25 +1585,24 @@ main(int argc, char **argv)
   box_init();
   cg_init();
 
-  switch (mode)
-    {
+  switch (mode){
     case OPT_INIT:
       if (optind < argc)
-	usage("--init mode takes no parameters\n");
+        usage("--init mode takes no parameters\n");
       init();
       break;
     case OPT_RUN:
       if (optind >= argc)
-	usage("--run mode requires a command to run\n");
+        usage("--run mode requires a command to run\n");
       run(argv+optind);
       break;
     case OPT_CLEANUP:
       if (optind < argc)
-	usage("--cleanup mode takes no parameters\n");
+        usage("--cleanup mode takes no parameters\n");
       cleanup();
       break;
     default:
       die("Internal error: mode mismatch");
-    }
+  }
   exit(0);
 }

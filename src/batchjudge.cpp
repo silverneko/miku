@@ -26,11 +26,16 @@ int main(int argc, char *argv[])
    sout.str("");
    sout << " /tmp/box/" << boxid << "/box/";
    system(("cp " + tddir + sout.str() + "input").c_str());
+   system(("chmod 755 " + sout.str()).c_str());
+   system(("touch " + sout.str() + "input").c_str());
+   system(("touch " + sout.str() + "output").c_str());
+   system(("chmod 666 " + sout.str() + "input").c_str());
+   system(("chmod 666 " + sout.str() + "output").c_str());
    system(("cp /tmp/box/" + testee + "/box/main.out" + sout.str() + "main.out").c_str());
    
    //set options
    sandboxOptions opt;
-      //opt.dirs.push_back("/tmp/box/10/box");
+   //opt.dirs.push_back("/tmp/box/10/box");
    opt.cgroup = true;
    opt.procs = 1;
    opt.input = "input";
@@ -41,6 +46,8 @@ int main(int argc, char *argv[])
    opt.meta = "./testzone/META" + sout.str();
    opt.timeout = time_limit;
    opt.mem = mem_limit;
+   opt.file_limit = 5;
+   opt.fsize_limit = 65536;
    
    //invoke box command
    sandboxExec(boxid, opt, "main.out");

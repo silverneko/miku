@@ -39,6 +39,9 @@ int fetchSubmission(submission &sub)
    }else if(string(buff) == "c"){
       sub.lang = "c";
       sub.std = "";
+   }else if(string(buff) == "haskell"){
+      sub.lang = "haskell";
+      sub.std = "";
    }else{
       sub.lang = "c++";
       sub.std = "c++11";
@@ -142,12 +145,7 @@ int fetchProblem(submission &sub)
       fscanf(Pipe, "%d %d", &sub.time_limit[i], &sub.mem_limit[i]);
    }
    pclose(Pipe);
-
-
-   //Only have Batch judge now, haven't done anything for `special`
-   //`interactive`, `output only` yet
-
-
+   
    return 0;
 }
 
@@ -178,22 +176,5 @@ int sendResult(submission &sub, int verdict, bool done)
    }
    system(sout.str().c_str());
    return 0;
-   /*
-   if(verdict != CE){
-      for(int i = 0; i < sub.testdata_count; ++i){
-         verdict = max(verdict, sub.verdict[i]);
-         cerr << "td" << i << " : time " << sub.time[i];
-         cerr << " mem " << sub.mem[i];
-         cerr << " verdict " << fromVerdict(sub.verdict[i]).toStr();
-         cerr << endl;
-      }
-   }
-   ostringstream sout;
-   sout << "update_verdict.py" << ' ' << sub.submission_id << ' ';
-   //sout << "'"<< fromVerdict(verdict).toStr() << "'";
-   sout << "'"<< fromVerdict(verdict).toAbr() << "'";
-   system(sout.str().c_str());
-   return 0;
-   */
 }
 

@@ -27,11 +27,13 @@ int sandboxExec(int boxid, const sandboxOptions &opt, const string &comm)
       sout << " --time=" << fixed << setprecision(3) << timeout;
       sout << " --wall-time=" << fixed << setprecision(3) << timeout * 2;
    }
+   if(opt.fsize_limit) sout << " --fsize=" << opt.fsize_limit;
+   sout << " --file-limit=" << opt.file_limit;
    sout << " --extra-time=0.2";
    sout << " --run -- " << comm;
-   system(sout.str().c_str());
+   cerr << "[debug] box-" << boxid << " execute command : " << sout.str() << endl;
    
-   cerr << "[debug] box-" << boxid << " executed command : " << sout.str() << endl;
+   system(sout.str().c_str());
    return 0;
 }
 
@@ -41,8 +43,8 @@ int sandboxInit(int boxid)
    sout << "isolate --box-id=" << boxid;
    sout << " --cg";
    sout << " --init 2>/dev/null >/dev/null";
-   system(sout.str().c_str());
    cerr << "[debug] box-" << boxid << " inited" << endl;
+   system(sout.str().c_str());
    return 0;
 }
 
@@ -52,7 +54,7 @@ int sandboxDele(int boxid)
    sout << "isolate --box-id=" << boxid;
    sout << " --cg";
    sout << " --cleanup 2>/dev/null >/dev/null";
-   system(sout.str().c_str());
    cerr << "[debug] box-" << boxid << " cleaned" << endl;
+   system(sout.str().c_str());
    return 0;
 }
