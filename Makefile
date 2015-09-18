@@ -3,10 +3,13 @@ CFLAGS = -Wall -std=c++11
 SRC = ./src
 HEADERS = ./src/config.h ./src/utils.h
 
-all: | ./bin ./build ./bin/miku ./bin/isolate ./bin/batchjudge
+all: | ./bin ./build ./bin/miku ./bin/isolate ./bin/batchjudge ./bin/tddump
 
 ./bin/miku: ./build/main.o ./build/sandbox.o ./build/testsuite.o ./build/server_io.o
 	$(CC) -o ./bin/miku ./build/main.o ./build/sandbox.o ./build/testsuite.o ./build/server_io.o $(CFLAGS)
+
+./bin/tddump: ./src/tddump.cpp ./build/server_io.o $(HEADERS)
+	$(CC) -o ./bin/tddump ./src/tddump.cpp ./build/server_io.o $(CFLAGS)
 
 ./build/main.o: ./src/main.cpp ./src/testsuite.h ./src/server_io.h $(HEADERS)
 	$(CC) -o ./build/main.o -c ./src/main.cpp $(CFLAGS)
