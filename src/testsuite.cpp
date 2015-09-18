@@ -64,9 +64,11 @@ int testsuite(submission &sub)
          command << " " << i;
          command << " " << BOXOFFSET + 10 + i;
          command << " " << time_limit[i];
-         command << " " << mem_limit[i];
+         if(sub.lang == "haskell")
+           command << " " << mem_limit[i]*5 + 24*1024;
+         else
+           command << " " << mem_limit[i];
          command << " " << testBoxid;
-         //
          pid_t pid = fork();
          if(pid == -1){
             perror("[ERROR] in testsuite, `fork()` failed :");
@@ -208,30 +210,6 @@ void eval(submission &sub, int td, int boxid, int spBoxid)
             }
          }
          break;
-         /*
-         if(tsol.eof()){
-            while(!mout.eof()){
-               string s;
-               getline(mout, s);
-               s.erase(s.find_last_not_of(" \n\r\t") + 1);
-               if(s != ""){
-                  status = WA;
-                  break;
-               }
-            }
-         }else{
-            while(!tsol.eof()){
-               string s;
-               getline(tsol, s);
-               s.erase(s.find_last_not_of(" \n\r\t") + 1);
-               if(s != ""){
-                  status = WA;
-                  break;
-               }
-            }
-         }
-         break;
-         */
       }
       if(tsol.eof() && mout.eof()){
          break;
